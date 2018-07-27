@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"target": "es2017",
+		"module": "commonjs",
+		"outDir": "./"
+	},
+	"files": ["C:/Users/ntasi/AppData/Local/Microsoft/TypeScript/2.9/node_modules/@types/node/index.d.ts"],
+	"include": ["*.ts"],
+	"exclude": ["node_modules"]
+}

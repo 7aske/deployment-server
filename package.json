@@ -1,0 +1,22 @@
+{
+	"name": "deployment",
+	"version": "1.0.0",
+	"description": "Software to deploy apps to servers",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js",
+		"c9start": "SRV=c9 node app.js"
+	},
+	"keywords": [
+		"deployment",
+		"server"
+	],
+	"author": "Nikola Tasic",
+	"license": "ISC",
+	"dependencies": {
+		"body-parser": "^1.18.3",
+		"commander": "^2.15.1",
+		"express": "^4.16.3",
+		"shortid": "^2.2.8"
+	}
+}
