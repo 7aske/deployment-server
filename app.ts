@@ -56,7 +56,6 @@ class Program {
 		this.repoDir = 'repos';
 		this.instancesJSON = 'repos/instances.json';
 		this.serverGen = 'gen/server.js';
-		this.PORT = parseInt(process.env.PORT) || port;
 		this.childPort = this.PORT + 1;
 		this.init();
 	}
@@ -346,32 +345,7 @@ class Program {
 	remove(query) {
 		//TODO: remove repository
 	}
-	setInstancesToJSON(): number {
-		// update instances.json
-		let result: Array<any> = [];
-		const repos: Array<string> = fs.readdirSync(this.repoDir, 'utf8');
-		let instancesJSON: any = JSON.parse(fs.readFileSync(this.instancesJSON, 'utf8'));
-		instancesJSON.instances.forEach(i => {
-			if (repos.indexOf(i.name) != -1) result.push(i);
-		});
-		fs.writeFileSync(this.instancesJSON, JSON.stringify({ instances: result }), 'utf8');
-		return result.length;
-	}
-	getInstanceFromJSON(query: string | void): Array<ServerInstance> {
-		// get the information about a repo from repos folder using instances.json
-		const instancesJSON: any = JSON.parse(fs.readFileSync(this.instancesJSON, 'utf8'));
-		let result: Array<ServerInstance> = [];
-		if (typeof query == 'string') {
-			result = instancesJSON.instances.filter(instance => {
-				return instance.id == query || instance.name == query;
-			});
-		} else if (query == null) {
-			result = instancesJSON.instances;
-		} else {
-			result = [];
-		}
-		return result;
-	}
+
 	getInstance(query: string | number | void): Array<ServerInstance> {
 		// get running instance process by PID | Name | ID
 		let result: Array<ServerInstance> = [];
@@ -392,7 +366,7 @@ class Program {
 		}
 		return result;
 	}
-	killInstance(query: string | number | void): Array<any> {
+	killInstance(query: string | number | null): Array<any> {
 		// kill running instance process by PID | Name | ID
 		let result: Array<any> = [];
 		const instances: Array<ServerInstance> = this.getInstance(query);
@@ -431,84 +405,7 @@ class Program {
 	}
 }
 const program = new Program();
-app.post('/deploy', async (req, res) => {
-	console.log(req.body);
-	let url: URL;
-	try {
-		url = new URL(req.body.repository);
-	} catch (err) {
-		url = err.input;
-	}
-	console.log(url.hostname);
-	if (url.hostname == 'github.com') {
-		let check: Array<ServerInstance> = program.getInstanceFromJSON(req.body.repository.match(Program.getName)[1]);
-		let err: ServerInstance;
-		let instance: ServerInstance = {
-			repo: url.toString(),
-			name: url.toString().match(Program.getName)[1],
-			id: id.generate(),
-			dir: `${program.repoDir}/${url.toString().match(Program.getName)[1]}`,
-			platform: Program.platform
-		};
-		if (check.length > 0) {
-			instance = check[0];
-			res.send({
-				repo: instance.repo,
-				id: instance.id,
-				name: instance.name,
-				messages: ['Repository already deployed. Use run [name] | [id] or update [name] | [id].']
-			});
-		} else {
-			try {
-				instance = await program.retrieve(instance);
-				console.info(instance);
-			} catch (error) {
-				err = error;
-			}
-			try {
-				if (!err) instance = await program.install(instance);
-				console.info(instance);
-			} catch (error) {
-				err = error;
-			}
-			try {
-				if (!err) instance = await program.run(instance);
-				console.info(instance);
-			} catch (error) {
-				err = error;
-			}
-			if (!err) {
-				res.send({
-					repo: instance.repo,
-					name: instance.name,
-					dir: instance.dir,
-					id: instance.id,
-					platform: instance.platform,
-					action: instance.action,
-					messages: instance.messages,
-					errors: instance.errors,
-					dependencies: instance.dependencies,
-					port: instance.port,
-					pid: instance.pid
-				});
-			} else {
-				res.send({
-					repo: instance.repo,
-					name: instance.name,
-					dir: instance.dir,
-					id: instance.id,
-					platform: instance.platform,
-					messages: instance.messages,
-					errors: instance.errors
-				});
-			}
-		}
-	} else {
-		res.send({
-			errors: 'Repository URL hostname must be "github.com"'
-		});
-	}
-});
+app.post('/deploy', async (req, res) => {});
 app.post('/kill', (req, res) => {
 	const query: number | string | void = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query);
 	if (program.getInstance(query).length != 0) {
