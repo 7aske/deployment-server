@@ -5,6 +5,20 @@ import * as path from 'path';
 import { resolve } from 'url';
 import { rejects } from 'assert';
 import { log } from 'util';
+/**
+ @prop repo Location of the GitHub repository eg https://www.github.com/user/repo.
+ @prop name Repository name parsed from its URL.
+ @prop id ID generated automatically with shortid.
+ @prop dir Server directory of the cloned repository "{repoDir}/{name}".
+ @prop platform Server platform.
+ @prop port Port assigned to child server. Assigned after "run" command. Default 3000.
+ @prop process Reference to the ChildProcess object running on the machine.
+ @prop pid Process ID assigned to child server. Assigned after "run" command.
+ @prop action Set to action used to fetch repo from GitHub. Either "pull" or "clone".
+ @prop messages Messages sent to stdout during retrieve/install/run.
+ @prop errors Errors sent to strderr during retrieve/install/run.
+ @prop dependencies Dependencies read from package.json file.
+ */
 
 export interface ChildServer {
 	repo: string;
@@ -12,27 +26,27 @@ export interface ChildServer {
 	id: string;
 	dir: string;
 	platform: string;
-
 	messages: Array<string>;
 	errors: Array<string>;
-
 	port?: number | void;
 	process?: child_process.ChildProcess;
 	pid?: number | void;
 	action?: string;
-
 	dependencies?: object;
 }
+/**
+ @prop dependencies Dependencies set from package.json file.
+ @prop main Main app entry point set from package.json file.
+ @prop name Name of the app.
+ */
 export interface childPackageJSON {
 	dependencies: object;
 	main: string;
 	name: string;
 }
-// export interface processMsg {
-// 	git: Array<string>;
-// 	npm: Array<string>;
-// 	node:Array<string>
-// }
+/**
+ @prop children Array of ChildServer instances.
+ */
 export interface childrenJSON {
 	children: Array<ChildServer>;
 }
@@ -396,5 +410,10 @@ export default class App {
 			port: child.port,
 			pid: child.pid
 		};
+	}
+	public cleanExit(): any {
+		let result = this.killChild(null);
+		console.log(`Killing ${result.length} child server processses.`);
+		process.exit();
 	}
 }

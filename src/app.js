@@ -374,5 +374,10 @@ class App {
             pid: child.pid
         };
     }
+    cleanExit() {
+        let result = this.killChild(null);
+        console.log(`Killing ${result.length} child server processses.`);
+        process.exit();
+    }
 }
 exports.default = App;
