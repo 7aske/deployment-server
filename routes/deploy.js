@@ -28,7 +28,8 @@ deploy.post('/', async (req, res) => {
             errors: [],
             messages: []
         };
-        console.log(check, child);
+        if (process.env.NODE_ENV == 'dev')
+            console.log(check, child);
         if (check.length == 1) {
             child = check[0];
             res.send({
@@ -36,7 +37,7 @@ deploy.post('/', async (req, res) => {
                 repo: child.repo,
                 id: child.id,
                 name: child.name,
-                errors: ['Repository already deployed. Use run [name] | [id] or update [name] | [id].']
+                errors: ['Repository already deployed. Use run [name | id] or update [name | id].']
             });
         }
         else if (check.length > 1) {
@@ -48,56 +49,41 @@ deploy.post('/', async (req, res) => {
         else {
             try {
                 child = await server_1.default.app.retrieve(child);
-                if (process.env.NODE_ENV == 'dev')
-                    console.info(child);
+                //if (process.env.NODE_ENV == 'dev') console.info(child);
             }
             catch (error) {
                 err = error;
-                if (process.env.NODE_ENV == 'dev')
-                    console.error(child);
+                //if (process.env.NODE_ENV == 'dev') console.error(child);
             }
-            // try {
-            // 	if (!err) child = await server.app.install(child);
-            // 	console.info(child);
-            // } catch (error) {
-            // 	err = error;
-            // }
-            // try {
-            // 	if (!err) child = await server.app.run(child);
-            // 	console.info(child);
-            // } catch (error) {
-            // 	err = error;
-            // }
+            try {
+                if (!err)
+                    child = await server_1.default.app.install(child);
+                //if (process.env.NODE_ENV == 'dev')console.info(child);
+            }
+            catch (error) {
+                err = error;
+                //if (process.env.NODE_ENV == 'dev') console.error(child);
+            }
+            try {
+                if (!err)
+                    child = await server_1.default.app.run(child);
+                //if (process.env.NODE_ENV == 'dev')console.info(child);
+            }
+            catch (error) {
+                err = error;
+                //if (process.env.NODE_ENV == 'dev') console.error(child);
+            }
             if (!err) {
-                res.send({
-                    repo: child.repo,
-                    name: child.name,
-                    dir: child.dir,
-                    id: child.id,
-                    platform: child.platform,
-                    action: child.action,
-                    messages: child.messages,
-                    errors: child.errors,
-                    dependencies: child.dependencies,
-                    port: child.port,
-                    pid: child.pid
-                });
+                res.send(server_1.default.app.formatChild(child));
             }
             else {
-                res.send({
-                    repo: child.repo,
-                    name: child.name,
-                    dir: child.dir,
-                    id: child.id,
-                    platform: child.platform,
-                    messages: child.messages,
-                    errors: child.errors
-                });
+                res.send(server_1.default.app.formatChild(err));
             }
         }
     }
     else {
         res.send({
+            query: url,
             errors: 'Repository URL hostname must be "github.com"'
         });
     }

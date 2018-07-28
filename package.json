@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "node server",
 		"c9start": "SRV=c9 node server",
-		"dev": "nodemon NODE_ENV=dev server -w server.js"
+		"dev": " set NODE_ENV=dev&& nodemon server -w server.js"
 	},
 	"keywords": [
 		"deployment",
