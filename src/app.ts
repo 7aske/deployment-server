@@ -6,18 +6,18 @@ import { resolve } from 'url';
 import { rejects } from 'assert';
 import { log } from 'util';
 /**
- @prop repo Location of the GitHub repository eg https://www.github.com/user/repo.
- @prop name Repository name parsed from its URL.
- @prop id ID generated automatically with shortid.
- @prop dir Server directory of the cloned repository "{repoDir}/{name}".
- @prop platform Server platform.
- @prop port Port assigned to child server. Assigned after "run" command. Default 3000.
- @prop process Reference to the ChildProcess object running on the machine.
- @prop pid Process ID assigned to child server. Assigned after "run" command.
- @prop action Set to action used to fetch repo from GitHub. Either "pull" or "clone".
- @prop messages Messages sent to stdout during retrieve/install/run.
- @prop errors Errors sent to strderr during retrieve/install/run.
- @prop dependencies Dependencies read from package.json file.
+ @property {string} repo - Location of the GitHub repository eg https://www.github.com/user/repo.
+ @property {string} name - Repository name parsed from its URL.
+ @property {string} id - ID generated automatically with shortid.
+ @property {string} dir - Server directory of the cloned repository "{repoDir}/{name}".
+ @property {string} platform - Server platform.
+ @property {number} port - Port assigned to child server. Assigned after "run" command. Default 3000.
+ @property {child_process.ChildProcess} process Reference to the ChildProcess object running on the machine.
+ @property {number} pid Process ID assigned to child server. Assigned after "run" command.
+ @property {string} action - Set to action used to fetch repo from GitHub. Either "pull" or "clone".
+ @property {Array<string>} messages Messages sent to stdout during retrieve/install/run.
+ @property {Array<string>} errors Errors sent to strderr during retrieve/install/run.
+ @property {object} dependencies Dependencies read from package.json file.
  */
 
 export interface ChildServer {
@@ -35,9 +35,9 @@ export interface ChildServer {
 	dependencies?: object;
 }
 /**
- @prop dependencies Dependencies set from package.json file.
- @prop main Main app entry point set from package.json file.
- @prop name Name of the app.
+ @property {object} dependencies Dependencies set from package.json file.
+ @property {string} main Main app entry point set from package.json file.
+ @property {string} name Name of the app.
  */
 export interface childPackageJSON {
 	dependencies: object;
@@ -45,7 +45,7 @@ export interface childPackageJSON {
 	name: string;
 }
 /**
- @prop children Array of ChildServer instances.
+ @property {Array<ChildServer>} children - Array of ChildServer instances.
  */
 export interface childrenJSON {
 	children: Array<ChildServer>;
