@@ -80,7 +80,8 @@ export default class App {
 			);
 		} else {
 			if (process.env.NODE_ENV == 'dev') console.log('Updating', this.childrenJSON, 'file');
-			this.setChildrenToJSON();
+			this.updateChildrenJSON();
+			this.sortChildrenJSON();
 		}
 	}
 	public retrieve(child: ChildServer): Promise<any> {
@@ -106,22 +107,12 @@ export default class App {
 				git.stdout.pipe(process.stdout);
 			}
 
-			git.stderr.on('data', stderr => {
-				const data = stderr.toString();
-				if (data.indexOf('fatal') != -1) {
-					child.errors.push(data);
-				} else {
-					child.messages.push(data);
-				}
+			git.stderr.on('data', data => {
+				child = this.formatStdOut(data, child);
 			});
 
-			git.stdout.on('data', stdout => {
-				const data = stdout.toString();
-				if (data.indexOf('fatal') != -1) {
-					child.errors.push(data);
-				} else {
-					child.messages.push(data);
-				}
+			git.stdout.on('data', data => {
+				child = this.formatStdOut(data, child);
 			});
 			git.on('exit', (code, signal) => {
 				if (process.env.NODE_ENV == 'dev') console.log('NPM process exited with code', code);
@@ -154,17 +145,11 @@ export default class App {
 						npm.stderr.pipe(process.stdout);
 						npm.stdout.pipe(process.stdout);
 					}
-					npm.stderr.on('data', stderr => {
-						const data = stderr.toString();
-						if (data.indexOf('ERR') != -1) {
-							child.errors.push(data);
-						} else child.messages.push(data);
+					npm.stderr.on('data', data => {
+						child = this.formatStdOut(data, child);
 					});
-					npm.stdout.on('data', stdout => {
-						const data = stdout.toString();
-						if (data.indexOf('ERR') != -1) {
-							child.errors.push(data);
-						} else child.messages.push(data);
+					npm.stdout.on('data', data => {
+						child = this.formatStdOut(data, child);
 					});
 					npm.on('close', (code, signal) => {
 						if (process.env.NODE_ENV == 'dev') console.log('NPM process exited with code', code);
@@ -182,24 +167,6 @@ export default class App {
 				child.errors.push('Invalid package.json file');
 				reject(child);
 			}
-
-			/*
-				let check: ChildServer | undefined = childrenJSON.children.find(i => {
-					return i.name == child.name;
-				});
-				if (!check)
-					childrenJSON.children.push({
-						name: child.name,
-						id: child.id,
-						repo: child.repo,
-						dir: child.dir,
-						platform: child.platform,
-						dependencies: child.dependencies,
-						messages: child.messages,
-						errors: child.errors
-					});
-				fs.writeFileSync(this.childrenJSON, JSON.stringify(childrenJSON), 'utf8');
-			*/
 		});
 	}
 	public run(child: ChildServer): Promise<ChildServer> {
@@ -209,45 +176,47 @@ export default class App {
 				const childPackageJSON: childPackageJSON = JSON.parse(
 					fs.readFileSync(path.join(process.cwd(), `${child.dir}/package.json`), 'utf8')
 				);
-
 				if (childPackageJSON.main) {
 					let main = childPackageJSON.main;
 					const port: number = this.getPort(child);
-					//if entry point is an html file open a basic static server
-
-					if (this.HTMLRegExp.test(main)) {
-						const serverCode: string = fs.readFileSync(
-							path.join(process.cwd(), this.defaultExpressServer),
-							'utf8'
-						);
-						fs.writeFileSync(path.join(process.cwd(), `${child.dir}/server.js`), serverCode, 'utf8');
-						//change entry point accordingly
-						main = 'server.js';
-					}
-					const nodeTest = await this.runTest(child, port, main);
-					if (nodeTest) {
-						if (process.env.NODE_ENV == 'dev') console.log('Tests return', nodeTest);
-						let node: child_process.ChildProcess;
-						//TODO: c9 integration
-						node = child_process.execFile('node', [main], {
-							cwd: path.join(process.cwd(), child.dir),
-							env: { PORT: port }
-						});
-						if (process.env.NODE_ENV == 'dev') {
-							//pipe output to main process for debugging
-							node.stderr.pipe(process.stdout);
-							node.stdout.pipe(process.stdout);
-						}
-
-						child.port = port;
-						this.setChildToJSON(child);
-						child.pid = node.pid;
-						child.process = node;
-						this.children.push(child);
-						resolve(child);
-					} else {
-						child.errors.push('There is something wrong.');
+					if (this.serverRunning(child.id)) {
+						child.errors.push('Server with that ID/Name is already running');
 						reject(child);
+					} else {
+						//if entry point is an html file open a basic static server
+						if (this.HTMLRegExp.test(main)) {
+							const serverCode: string = fs.readFileSync(
+								path.join(process.cwd(), this.defaultExpressServer),
+								'utf8'
+							);
+							fs.writeFileSync(path.join(process.cwd(), `${child.dir}/server.js`), serverCode, 'utf8');
+							//change entry point accordingly
+							main = 'server.js';
+						}
+						if (await this.runTest(child, port, main)) {
+							if (process.env.NODE_ENV == 'dev') console.log('Tests return true');
+							let node: child_process.ChildProcess;
+							//TODO: c9 integration
+							node = child_process.execFile('node', [main], {
+								cwd: path.join(process.cwd(), child.dir),
+								env: { PORT: port }
+							});
+							if (process.env.NODE_ENV == 'dev') {
+								//pipe output to main process for debugging
+								node.stderr.pipe(process.stdout);
+								node.stdout.pipe(process.stdout);
+							}
+							child.port = port;
+							this.setChildToJSON(child);
+							child.pid = node.pid;
+							child.process = node;
+							this.children.push(child);
+							resolve(child);
+						} else {
+							if (process.env.NODE_ENV == 'dev') console.log('Tests return false');
+							child.errors.push('There is something wrong.');
+							reject(child);
+						}
 					}
 				} else {
 					child.errors.push('Invalid package.json entry point.');
@@ -276,7 +245,7 @@ export default class App {
 			}
 			setTimeout(() => {
 				if (!node.killed) {
-					console.log('Killing node process');
+					if (process.env.NODE_ENV == 'dev') console.log('Killing node process');
 					node.kill();
 				}
 			}, 2000);
@@ -287,10 +256,55 @@ export default class App {
 			});
 		});
 	}
+	public remove(child: ChildServer | null): Promise<ChildServer> | Promise<any> {
+		return new Promise((resolve, reject) => {
+			if (child) {
+				// const childrenJSON: childrenJSON = JSON.parse(
+				// 	fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8')
+				// );
+				// const index = childrenJSON.children.indexOf(child);
+				if (this.serverRunning(child.id)) {
+					const runningChild: Array<ChildServer> = this.getRunningChild(child.id);
+					runningChild[0].process!.kill();
+				}
+				let error: boolean = false;
+
+				const rm: child_process.ChildProcess = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
+				if (process.env.NODE_ENV == 'dev') {
+					//pipe output to main process for debugging
+					rm.stderr.pipe(process.stdout);
+					rm.stdout.pipe(process.stdout);
+				}
+				rm.stderr.on('data', data => {
+					child.errors.push(data.toString());
+					error = true;
+				});
+				rm.stdout.on('data', data => {
+					child.messages.push(data.toString());
+				});
+				rm.on('error', data => {
+					child.errors.push(data.message);
+					error = true;
+				});
+				rm.on('close', data => {
+					if (error) reject(child);
+					else {
+						// childrenJSON.children.splice(index, 1);
+						// fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
+						this.updateChildrenJSON();
+						resolve(child);
+					}
+				});
+			} else {
+				reject({
+					errors: ['Invalid child object']
+				});
+			}
+		});
+	}
 	protected getPort(child: ChildServer): number {
 		//if child doesnt have predefined port
 		//find first available port by searching through children.json children array
-
 		const childrenJSON: childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
 		if (childrenJSON.children.length == 0) return this.childPort;
 		if (child.port) {
@@ -302,6 +316,11 @@ export default class App {
 			}
 			return this.childPort;
 		}
+	}
+	protected serverRunning(query: string | number): boolean {
+		const child: ChildServer | undefined = this.children.find(c => c.id == query || c.name == query || c.pid == query);
+		if (child) return true;
+		else return false;
 	}
 	protected setChildToJSON(newChild: ChildServer): void {
 		const childrenJSON: childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
@@ -332,7 +351,7 @@ export default class App {
 		}
 		return result;
 	}
-	protected setChildrenToJSON(): void {
+	protected updateChildrenJSON(): void {
 		// update children.json
 		let result: Array<any> = [];
 		const repos: Array<string> = fs.readdirSync(this.repoDir, 'utf8');
@@ -340,6 +359,7 @@ export default class App {
 		childrenJSON.children.forEach(i => {
 			if (repos.indexOf(i.name) != -1) result.push(i);
 		});
+		this.childPort = 3001;
 		fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify({ children: result }), 'utf8');
 	}
 
@@ -395,6 +415,15 @@ export default class App {
 		} else {
 			return result;
 		}
+	}
+	protected formatStdOut(stdout: string | Buffer, child: ChildServer): ChildServer {
+		const data = stdout.toString();
+		if (data.indexOf('fatal') != -1) {
+			child.errors.push(data);
+		} else {
+			child.messages.push(data);
+		}
+		return child;
 	}
 	public formatChild(child: ChildServer): ChildServer {
 		return {

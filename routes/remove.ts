@@ -2,10 +2,10 @@ import * as App from '../src/app';
 import * as express from 'express';
 import server from '../server';
 
-const run = express.Router();
-run.post('/', async (req: express.Request, res: express.Response) => {
+const remove = express.Router();
+remove.post('/', async (req: express.Request, res: express.Response) => {
 	if (process.env.NODE_ENV == 'dev') console.log(req.body);
-	const query: string | null = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query);
+	const query: string | null = req.body.query ? req.body.query : null;
 	let response: Array<App.ChildServer> = [];
 	let errors: Array<App.ChildServer> = [];
 	const result: Array<App.ChildServer> = server.app.getChildrenFromJSON(query);
@@ -13,8 +13,8 @@ run.post('/', async (req: express.Request, res: express.Response) => {
 	if (result.length > 0) {
 		result.forEach(async (child, i, array) => {
 			try {
-				const newChild = await server.app.run(child);
-				response.push(server.app.formatChild(newChild));
+				const removedRepo = await server.app.remove(child);
+				response.push(server.app.formatChild(removedRepo));
 			} catch (err) {
 				errors.push(err);
 			}
@@ -26,9 +26,9 @@ run.post('/', async (req: express.Request, res: express.Response) => {
 	} else {
 		res.send({
 			query: query,
-			errors: ['No servers found']
+			errors: ['No repositories found']
 		});
 	}
 });
 
-export default run;
+export default remove;

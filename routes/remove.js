@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const server_1 = require("../server");
-const run = express.Router();
-run.post('/', async (req, res) => {
+const remove = express.Router();
+remove.post('/', async (req, res) => {
     if (process.env.NODE_ENV == 'dev')
         console.log(req.body);
-    const query = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query);
+    const query = req.body.query ? req.body.query : null;
     let response = [];
     let errors = [];
     const result = server_1.default.app.getChildrenFromJSON(query);
@@ -15,8 +15,8 @@ run.post('/', async (req, res) => {
     if (result.length > 0) {
         result.forEach(async (child, i, array) => {
             try {
-                const newChild = await server_1.default.app.run(child);
-                response.push(server_1.default.app.formatChild(newChild));
+                const removedRepo = await server_1.default.app.remove(child);
+                response.push(server_1.default.app.formatChild(removedRepo));
             }
             catch (err) {
                 errors.push(err);
@@ -32,8 +32,8 @@ run.post('/', async (req, res) => {
     else {
         res.send({
             query: query,
-            errors: ['No servers found']
+            errors: ['No repositories found']
         });
     }
 });
-exports.default = run;
+exports.default = remove;

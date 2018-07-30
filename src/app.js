@@ -25,7 +25,8 @@ class App {
         else {
             if (process.env.NODE_ENV == 'dev')
                 console.log('Updating', this.childrenJSON, 'file');
-            this.setChildrenToJSON();
+            this.updateChildrenJSON();
+            this.sortChildrenJSON();
         }
     }
     retrieve(child) {
@@ -51,23 +52,11 @@ class App {
                 git.stderr.pipe(process.stdout);
                 git.stdout.pipe(process.stdout);
             }
-            git.stderr.on('data', stderr => {
-                const data = stderr.toString();
-                if (data.indexOf('fatal') != -1) {
-                    child.errors.push(data);
-                }
-                else {
-                    child.messages.push(data);
-                }
+            git.stderr.on('data', data => {
+                child = this.formatStdOut(data, child);
             });
-            git.stdout.on('data', stdout => {
-                const data = stdout.toString();
-                if (data.indexOf('fatal') != -1) {
-                    child.errors.push(data);
-                }
-                else {
-                    child.messages.push(data);
-                }
+            git.stdout.on('data', data => {
+                child = this.formatStdOut(data, child);
             });
             git.on('exit', (code, signal) => {
                 if (process.env.NODE_ENV == 'dev')
@@ -100,21 +89,11 @@ class App {
                         npm.stderr.pipe(process.stdout);
                         npm.stdout.pipe(process.stdout);
                     }
-                    npm.stderr.on('data', stderr => {
-                        const data = stderr.toString();
-                        if (data.indexOf('ERR') != -1) {
-                            child.errors.push(data);
-                        }
-                        else
-                            child.messages.push(data);
+                    npm.stderr.on('data', data => {
+                        child = this.formatStdOut(data, child);
                     });
-                    npm.stdout.on('data', stdout => {
-                        const data = stdout.toString();
-                        if (data.indexOf('ERR') != -1) {
-                            child.errors.push(data);
-                        }
-                        else
-                            child.messages.push(data);
+                    npm.stdout.on('data', data => {
+                        child = this.formatStdOut(data, child);
                     });
                     npm.on('close', (code, signal) => {
                         if (process.env.NODE_ENV == 'dev')
@@ -136,23 +115,6 @@ class App {
                 child.errors.push('Invalid package.json file');
                 reject(child);
             }
-            /*
-                let check: ChildServer | undefined = childrenJSON.children.find(i => {
-                    return i.name == child.name;
-                });
-                if (!check)
-                    childrenJSON.children.push({
-                        name: child.name,
-                        id: child.id,
-                        repo: child.repo,
-                        dir: child.dir,
-                        platform: child.platform,
-                        dependencies: child.dependencies,
-                        messages: child.messages,
-                        errors: child.errors
-                    });
-                fs.writeFileSync(this.childrenJSON, JSON.stringify(childrenJSON), 'utf8');
-            */
         });
     }
     run(child) {
@@ -163,38 +125,45 @@ class App {
                 if (childPackageJSON.main) {
                     let main = childPackageJSON.main;
                     const port = this.getPort(child);
-                    //if entry point is an html file open a basic static server
-                    if (this.HTMLRegExp.test(main)) {
-                        const serverCode = fs.readFileSync(path.join(process.cwd(), this.defaultExpressServer), 'utf8');
-                        fs.writeFileSync(path.join(process.cwd(), `${child.dir}/server.js`), serverCode, 'utf8');
-                        //change entry point accordingly
-                        main = 'server.js';
-                    }
-                    const nodeTest = await this.runTest(child, port, main);
-                    if (nodeTest) {
-                        if (process.env.NODE_ENV == 'dev')
-                            console.log('Tests return', nodeTest);
-                        let node;
-                        //TODO: c9 integration
-                        node = child_process.execFile('node', [main], {
-                            cwd: path.join(process.cwd(), child.dir),
-                            env: { PORT: port }
-                        });
-                        if (process.env.NODE_ENV == 'dev') {
-                            //pipe output to main process for debugging
-                            node.stderr.pipe(process.stdout);
-                            node.stdout.pipe(process.stdout);
-                        }
-                        child.port = port;
-                        this.setChildToJSON(child);
-                        child.pid = node.pid;
-                        child.process = node;
-                        this.children.push(child);
-                        resolve(child);
+                    if (this.serverRunning(child.id)) {
+                        child.errors.push('Server with that ID/Name is already running');
+                        reject(child);
                     }
                     else {
-                        child.errors.push('There is something wrong.');
-                        reject(child);
+                        //if entry point is an html file open a basic static server
+                        if (this.HTMLRegExp.test(main)) {
+                            const serverCode = fs.readFileSync(path.join(process.cwd(), this.defaultExpressServer), 'utf8');
+                            fs.writeFileSync(path.join(process.cwd(), `${child.dir}/server.js`), serverCode, 'utf8');
+                            //change entry point accordingly
+                            main = 'server.js';
+                        }
+                        if (await this.runTest(child, port, main)) {
+                            if (process.env.NODE_ENV == 'dev')
+                                console.log('Tests return true');
+                            let node;
+                            //TODO: c9 integration
+                            node = child_process.execFile('node', [main], {
+                                cwd: path.join(process.cwd(), child.dir),
+                                env: { PORT: port }
+                            });
+                            if (process.env.NODE_ENV == 'dev') {
+                                //pipe output to main process for debugging
+                                node.stderr.pipe(process.stdout);
+                                node.stdout.pipe(process.stdout);
+                            }
+                            child.port = port;
+                            this.setChildToJSON(child);
+                            child.pid = node.pid;
+                            child.process = node;
+                            this.children.push(child);
+                            resolve(child);
+                        }
+                        else {
+                            if (process.env.NODE_ENV == 'dev')
+                                console.log('Tests return false');
+                            child.errors.push('There is something wrong.');
+                            reject(child);
+                        }
                     }
                 }
                 else {
@@ -226,7 +195,8 @@ class App {
             }
             setTimeout(() => {
                 if (!node.killed) {
-                    console.log('Killing node process');
+                    if (process.env.NODE_ENV == 'dev')
+                        console.log('Killing node process');
                     node.kill();
                 }
             }, 2000);
@@ -238,6 +208,53 @@ class App {
                 else
                     reject(false);
             });
+        });
+    }
+    remove(child) {
+        return new Promise((resolve, reject) => {
+            if (child) {
+                // const childrenJSON: childrenJSON = JSON.parse(
+                // 	fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8')
+                // );
+                // const index = childrenJSON.children.indexOf(child);
+                if (this.serverRunning(child.id)) {
+                    const runningChild = this.getRunningChild(child.id);
+                    runningChild[0].process.kill();
+                }
+                let error = false;
+                const rm = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
+                if (process.env.NODE_ENV == 'dev') {
+                    //pipe output to main process for debugging
+                    rm.stderr.pipe(process.stdout);
+                    rm.stdout.pipe(process.stdout);
+                }
+                rm.stderr.on('data', data => {
+                    child.errors.push(data.toString());
+                    error = true;
+                });
+                rm.stdout.on('data', data => {
+                    child.messages.push(data.toString());
+                });
+                rm.on('error', data => {
+                    child.errors.push(data.message);
+                    error = true;
+                });
+                rm.on('close', data => {
+                    if (error)
+                        reject(child);
+                    else {
+                        // childrenJSON.children.splice(index, 1);
+                        // fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
+                        this.updateChildrenJSON();
+                        resolve(child);
+                    }
+                });
+            }
+            else {
+                reject({
+                    errors: ['Invalid child object']
+                });
+            }
         });
     }
     getPort(child) {
@@ -258,6 +275,13 @@ class App {
             }
             return this.childPort;
         }
+    }
+    serverRunning(query) {
+        const child = this.children.find(c => c.id == query || c.name == query || c.pid == query);
+        if (child)
+            return true;
+        else
+            return false;
     }
     setChildToJSON(newChild) {
         const childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
@@ -291,7 +315,7 @@ class App {
         }
         return result;
     }
-    setChildrenToJSON() {
+    updateChildrenJSON() {
         // update children.json
         let result = [];
         const repos = fs.readdirSync(this.repoDir, 'utf8');
@@ -300,6 +324,7 @@ class App {
             if (repos.indexOf(i.name) != -1)
                 result.push(i);
         });
+        this.childPort = 3001;
         fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify({ children: result }), 'utf8');
     }
     sortChildrenJSON() {
@@ -358,6 +383,16 @@ class App {
         else {
             return result;
         }
+    }
+    formatStdOut(stdout, child) {
+        const data = stdout.toString();
+        if (data.indexOf('fatal') != -1) {
+            child.errors.push(data);
+        }
+        else {
+            child.messages.push(data);
+        }
+        return child;
     }
     formatChild(child) {
         return {
