@@ -8,6 +8,7 @@ const kill_js_1 = require("./routes/kill.js");
 const run_js_1 = require("./routes/run.js");
 const update_js_1 = require("./routes/update.js");
 const remove_js_1 = require("./routes/remove.js");
+const clear_js_1 = require("./routes/clear.js");
 class Router {
     constructor() {
         this.routes = express.Router();
@@ -21,6 +22,7 @@ class Router {
         this.routes.use('/run', run_js_1.default);
         this.routes.use('/update', update_js_1.default);
         this.routes.use('/remove', remove_js_1.default);
+        this.routes.use('/clear', clear_js_1.default);
     }
 }
 exports.default = Router;

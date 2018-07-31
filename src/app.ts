@@ -128,9 +128,6 @@ export default class App {
 		return new Promise((resolve, reject) => {
 			// npm doesnt seem to work with spawn
 			// --prefix makes a lot of junk files
-			// let childrenJSON: childrenJSON = JSON.parse(
-			// 	fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8')
-			// );
 			if (fs.existsSync(`./${child.dir}/package.json`)) {
 				const childPackageJSON: childPackageJSON = JSON.parse(
 					fs.readFileSync(path.join(process.cwd(), `${child.dir}/package.json`), 'utf8')
@@ -259,10 +256,6 @@ export default class App {
 	public remove(child: ChildServer | null): Promise<ChildServer> | Promise<any> {
 		return new Promise((resolve, reject) => {
 			if (child) {
-				// const childrenJSON: childrenJSON = JSON.parse(
-				// 	fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8')
-				// );
-				// const index = childrenJSON.children.indexOf(child);
 				if (this.serverRunning(child.id)) {
 					// @ts-ignore
 					const runningChild: ChildServer | null = this.getRunningChildren(child.id);
@@ -302,6 +295,34 @@ export default class App {
 				});
 			}
 		});
+	}
+	public clear(query: string | null) {
+		let childrenJSON: childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+		if (typeof query == 'string') {
+			childrenJSON.children.forEach(child => {
+				if (child.id == query || child.name == query) {
+					child.messages = [];
+					child.errors = [];
+				}
+			});
+			this.children.forEach(child => {
+				if (child.id == query || child.name == query) {
+					child.messages = [];
+					child.errors = [];
+				}
+			});
+		} else {
+			childrenJSON.children.forEach(child => {
+				child.messages = [];
+				child.errors = [];
+			});
+			this.children.forEach(child => {
+				child.messages = [];
+				child.errors = [];
+			});
+		}
+		fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
+		return true;
 	}
 	protected getPort(child: ChildServer): number {
 		//if child doesnt have predefined port
@@ -393,27 +414,7 @@ export default class App {
 		}
 		return this.children;
 	}
-	// public killChild(query: string | number | null): Array<ChildServer> {
-	// 	// kill running instance process by PID | Name | ID
-	// 	let result: Array<ChildServer> = [];
-	// 	const children: Array<ChildServer> = this.getRunningChild(query);
-	// 	//TODO: c9 integration
-	// 	//child_process.exec(`pkill -P ${instance.pid}`);
-	// 	if (children.length > 0) {
-	// 		children.forEach(child => {
-	// 			child.process!.kill();
-	// 			if (child.process!.killed) {
-	// 				result.push(this.formatChild(child));
-	// 			}
-	// 		});
-	// 		this.children = this.children.filter(child => {
-	// 			return !child.process!.killed;
-	// 		});
-	// 		return result;
-	// 	} else {
-	// 		return result;
-	// 	}
-	// }
+
 	public killChild(child: ChildServer): Promise<ChildServer> {
 		// kill running instance process by PID | Name | ID
 		console.log('killing');
@@ -463,7 +464,6 @@ export default class App {
 				this.killChild(child);
 			});
 		}
-		//console.log(`Killing ${result.length} child server processses.`);
 		process.exit();
 	}
 }
