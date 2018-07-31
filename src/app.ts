@@ -266,7 +266,7 @@ export default class App {
 				if (this.serverRunning(child.id)) {
 					// @ts-ignore
 					const runningChild: ChildServer | null = this.getRunningChildren(child.id);
-					runningChild ? runningChild.process!.kill() : reject(child);
+					runningChild ? this.killChild(runningChild) : reject(child);
 				}
 				let error: boolean = false;
 
@@ -421,9 +421,6 @@ export default class App {
 		return new Promise((resolve, reject) => {
 			child.process!.kill();
 			if (child.process!.killed) {
-				// this.children = this.children.filter(child => {
-				// 	return child.process!.killed;
-				// });
 				this.children.splice(this.children.indexOf(child), 1);
 				resolve(this.formatChild(child));
 			} else {
