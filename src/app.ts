@@ -332,9 +332,11 @@ export default class App {
 				return child.id == query || child.name == 'query';
 			});
 			if (child) result.push(child);
+			if (result.length > 0) return result;
+			else return [];
+		} else {
+			return childrenJSON.children;
 		}
-		if (result.length > 0) return result;
-		else return childrenJSON.children;
 	}
 	protected getPort(child: ChildServer): number {
 		//if child doesnt have predefined port

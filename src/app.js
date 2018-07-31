@@ -289,11 +289,14 @@ class App {
             });
             if (child)
                 result.push(child);
+            if (result.length > 0)
+                return result;
+            else
+                return [];
         }
-        if (result.length > 0)
-            return result;
-        else
+        else {
             return childrenJSON.children;
+        }
     }
     getPort(child) {
         //if child doesnt have predefined port
