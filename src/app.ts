@@ -324,6 +324,18 @@ export default class App {
 		fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
 		return true;
 	}
+	public browse(query: string | null): Array<ChildServer> {
+		const childrenJSON: childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+		const result: Array<ChildServer> = [];
+		if (typeof query == 'string') {
+			const child = childrenJSON.children.find(child => {
+				return child.id == query || child.name == 'query';
+			});
+			if (child) result.push(child);
+		}
+		if (result.length > 0) return result;
+		else return childrenJSON.children;
+	}
 	protected getPort(child: ChildServer): number {
 		//if child doesnt have predefined port
 		//find first available port by searching through children.json children array
