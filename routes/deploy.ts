@@ -11,7 +11,7 @@ deploy.post('/', async (req: express.Request, res: express.Response) => {
 	if (process.env.NODE_ENV == 'dev') console.log(req.body);
 	let url: URL;
 	try {
-		url = new URL(req.body.repository);
+		url = new URL(req.body.query);
 	} catch (err) {
 		url = err.input;
 	}

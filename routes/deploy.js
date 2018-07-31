@@ -11,7 +11,7 @@ deploy.post('/', async (req, res) => {
         console.log(req.body);
     let url;
     try {
-        url = new url_1.URL(req.body.repository);
+        url = new url_1.URL(req.body.query);
     }
     catch (err) {
         url = err.input;
