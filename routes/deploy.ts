@@ -16,7 +16,7 @@ deploy.post('/', async (req: express.Request, res: express.Response) => {
 		url = err.input;
 	}
 	if (url.hostname == 'github.com') {
-		let check: Array<App.ChildServer> = server.app.getChildrenFromJSON(req.body.repository.match(/.*\/(.*)$/)[1]);
+		let check: Array<App.ChildServer> = server.app.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
 		let err: App.ChildServer | null = null;
 		let child: App.ChildServer = {
 			repo: url.toString(),
