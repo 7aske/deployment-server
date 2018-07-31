@@ -62,6 +62,7 @@ class App {
                 if (process.env.NODE_ENV == 'dev')
                     console.log('NPM process exited with code', code);
                 if (code == 0 && child.errors.length == 0) {
+                    pull ? (child.dateLastUpdated = new Date()) : (child.dateDeployed = new Date());
                     resolve(child);
                 }
                 else {
@@ -96,6 +97,8 @@ class App {
                         if (process.env.NODE_ENV == 'dev')
                             console.log('NPM process exited with code', code);
                         if (code == 0 && child.errors.length == 0) {
+                            child.dateLastUpdated = new Date();
+                            this.setChildToJSON(child);
                             resolve(child);
                         }
                         else {
@@ -148,6 +151,7 @@ class App {
                                 node.stderr.pipe(process.stdout);
                                 node.stdout.pipe(process.stdout);
                             }
+                            child.dateLastRun = new Date();
                             child.port = port;
                             this.setChildToJSON(child);
                             child.pid = node.pid;
@@ -431,6 +435,9 @@ class App {
             dir: child.dir,
             id: child.id,
             platform: child.platform,
+            dateDeployed: child.dateDeployed,
+            dateLastUpdated: child.dateLastUpdated,
+            dateLastRun: child.dateLastRun,
             dependencies: child.dependencies,
             messages: child.messages,
             errors: child.errors,

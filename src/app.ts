@@ -28,6 +28,9 @@ export interface ChildServer {
 	platform: string;
 	messages: Array<string>;
 	errors: Array<string>;
+	dateDeployed?: Date;
+	dateLastUpdated?: Date;
+	dateLastRun?: Date;
 	port?: number | void;
 	process?: child_process.ChildProcess;
 	pid?: number | void;
@@ -101,6 +104,7 @@ export default class App {
 			// 	? child_process.exec(`cd ./${child.dir} && git pull`)
 			// 	: child_process.exec(`cd ./${this.repoDir} && git clone ${child.repo}`);
 			child.action = pull ? 'pull' : 'clone';
+
 			if (process.env.NODE_ENV == 'dev') {
 				//pipe output to main process for debugging
 				git.stderr.pipe(process.stdout);
@@ -117,6 +121,7 @@ export default class App {
 			git.on('exit', (code, signal) => {
 				if (process.env.NODE_ENV == 'dev') console.log('NPM process exited with code', code);
 				if (code == 0 && child.errors.length == 0) {
+					pull ? (child.dateLastUpdated = new Date()) : (child.dateDeployed = new Date());
 					resolve(child);
 				} else {
 					reject(child);
@@ -151,6 +156,8 @@ export default class App {
 					npm.on('close', (code, signal) => {
 						if (process.env.NODE_ENV == 'dev') console.log('NPM process exited with code', code);
 						if (code == 0 && child.errors.length == 0) {
+							child.dateLastUpdated = new Date();
+							this.setChildToJSON(child);
 							resolve(child);
 						} else {
 							reject(child);
@@ -203,6 +210,7 @@ export default class App {
 								node.stderr.pipe(process.stdout);
 								node.stdout.pipe(process.stdout);
 							}
+							child.dateLastRun = new Date();
 							child.port = port;
 							this.setChildToJSON(child);
 							child.pid = node.pid;
@@ -462,6 +470,9 @@ export default class App {
 			dir: child.dir,
 			id: child.id,
 			platform: child.platform,
+			dateDeployed: child.dateDeployed,
+			dateLastUpdated: child.dateLastUpdated,
+			dateLastRun: child.dateLastRun,
 			dependencies: child.dependencies,
 			messages: child.messages,
 			errors: child.errors,
