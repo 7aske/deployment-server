@@ -285,8 +285,9 @@ class App {
         const result = [];
         if (typeof query == 'string') {
             const child = childrenJSON.children.find(child => {
-                return child.id == query || child.name == 'query';
+                return child.id == query || child.name == query;
             });
+            console.log(childrenJSON.children);
             if (child)
                 result.push(child);
             if (result.length > 0)

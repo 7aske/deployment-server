@@ -329,8 +329,9 @@ export default class App {
 		const result: Array<ChildServer> = [];
 		if (typeof query == 'string') {
 			const child = childrenJSON.children.find(child => {
-				return child.id == query || child.name == 'query';
+				return child.id == query || child.name == query;
 			});
+			console.log(childrenJSON.children);
 			if (child) result.push(child);
 			if (result.length > 0) return result;
 			else return [];
