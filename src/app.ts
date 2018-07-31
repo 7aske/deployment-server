@@ -264,8 +264,9 @@ export default class App {
 				// );
 				// const index = childrenJSON.children.indexOf(child);
 				if (this.serverRunning(child.id)) {
-					const runningChild: Array<ChildServer> = this.getRunningChild(child.id);
-					runningChild[0].process!.kill();
+					// @ts-ignore
+					const runningChild: ChildServer | null = this.getRunningChildren(child.id);
+					runningChild ? runningChild.process!.kill() : reject(child);
 				}
 				let error: boolean = false;
 
@@ -380,45 +381,60 @@ export default class App {
 			fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
 		}
 	}
-	public getRunningChild(query: string | number | null): Array<ChildServer> {
+	public getRunningChildren(query: string | number | null): Array<ChildServer> | ChildServer | null {
 		let result: Array<ChildServer> = [];
 		if (typeof query == 'string') {
 			const child = this.children.find(child => child.id == query || child.name == query);
-			if (child) result.push(child);
-			return result;
+			return child ? child : null;
 		}
 		if (typeof query == 'number') {
 			const child = this.children.find(child => child.pid == query);
-			if (child) result.push(child);
-			return result;
+			return child ? child : null;
 		}
-		if (query == null) return this.children;
-		return result;
+		return this.children;
 	}
-	public killChild(query: string | number | null): Array<ChildServer> {
+	// public killChild(query: string | number | null): Array<ChildServer> {
+	// 	// kill running instance process by PID | Name | ID
+	// 	let result: Array<ChildServer> = [];
+	// 	const children: Array<ChildServer> = this.getRunningChild(query);
+	// 	//TODO: c9 integration
+	// 	//child_process.exec(`pkill -P ${instance.pid}`);
+	// 	if (children.length > 0) {
+	// 		children.forEach(child => {
+	// 			child.process!.kill();
+	// 			if (child.process!.killed) {
+	// 				result.push(this.formatChild(child));
+	// 			}
+	// 		});
+	// 		this.children = this.children.filter(child => {
+	// 			return !child.process!.killed;
+	// 		});
+	// 		return result;
+	// 	} else {
+	// 		return result;
+	// 	}
+	// }
+	public killChild(child: ChildServer): Promise<ChildServer> {
 		// kill running instance process by PID | Name | ID
-		let result: Array<ChildServer> = [];
-		const children: Array<ChildServer> = this.getRunningChild(query);
-		//TODO: c9 integration
-		//child_process.exec(`pkill -P ${instance.pid}`);
-		if (children.length > 0) {
-			children.forEach(child => {
-				child.process!.kill();
-				if (child.process!.killed) {
-					result.push(this.formatChild(child));
-				}
-			});
-			this.children = this.children.filter(child => {
-				return !child.process!.killed;
-			});
-			return result;
-		} else {
-			return result;
-		}
+		console.log('killing');
+
+		return new Promise((resolve, reject) => {
+			child.process!.kill();
+			if (child.process!.killed) {
+				// this.children = this.children.filter(child => {
+				// 	return child.process!.killed;
+				// });
+				this.children.splice(this.children.indexOf(child), 1);
+				resolve(this.formatChild(child));
+			} else {
+				reject(this.formatChild(child));
+			}
+		});
 	}
 	protected formatStdOut(stdout: string | Buffer, child: ChildServer): ChildServer {
+		//format stdout to differentiate between errors and messages
 		const data = stdout.toString();
-		if (data.indexOf('fatal') != -1) {
+		if (data.indexOf('fatal') != -1 || data.indexOf('ERR') != -1) {
 			child.errors.push(data);
 		} else {
 			child.messages.push(data);
@@ -426,6 +442,7 @@ export default class App {
 		return child;
 	}
 	public formatChild(child: ChildServer): ChildServer {
+		//format server output to avoid JSON parse circular JSON exceptions
 		return {
 			repo: child.repo,
 			name: child.name,
@@ -441,8 +458,15 @@ export default class App {
 		};
 	}
 	public cleanExit(): any {
-		let result = this.killChild(null);
-		console.log(`Killing ${result.length} child server processses.`);
+		// @ts-ignore
+		const children: Array<ChildServer> | null = this.getRunningChildren(null);
+		if (children) {
+			// @ts-ignore
+			children.forEach(child => {
+				this.killChild(child);
+			});
+		}
+		//console.log(`Killing ${result.length} child server processses.`);
 		process.exit();
 	}
 }

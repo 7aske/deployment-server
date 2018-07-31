@@ -218,8 +218,9 @@ class App {
                 // );
                 // const index = childrenJSON.children.indexOf(child);
                 if (this.serverRunning(child.id)) {
-                    const runningChild = this.getRunningChild(child.id);
-                    runningChild[0].process.kill();
+                    // @ts-ignore
+                    const runningChild = this.getRunningChildren(child.id);
+                    runningChild ? runningChild.process.kill() : reject(child);
                 }
                 let error = false;
                 const rm = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
@@ -344,49 +345,60 @@ class App {
             fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
         }
     }
-    getRunningChild(query) {
+    getRunningChildren(query) {
         let result = [];
         if (typeof query == 'string') {
             const child = this.children.find(child => child.id == query || child.name == query);
-            if (child)
-                result.push(child);
-            return result;
+            return child ? child : null;
         }
         if (typeof query == 'number') {
             const child = this.children.find(child => child.pid == query);
-            if (child)
-                result.push(child);
-            return result;
+            return child ? child : null;
         }
-        if (query == null)
-            return this.children;
-        return result;
+        return this.children;
     }
-    killChild(query) {
+    // public killChild(query: string | number | null): Array<ChildServer> {
+    // 	// kill running instance process by PID | Name | ID
+    // 	let result: Array<ChildServer> = [];
+    // 	const children: Array<ChildServer> = this.getRunningChild(query);
+    // 	//TODO: c9 integration
+    // 	//child_process.exec(`pkill -P ${instance.pid}`);
+    // 	if (children.length > 0) {
+    // 		children.forEach(child => {
+    // 			child.process!.kill();
+    // 			if (child.process!.killed) {
+    // 				result.push(this.formatChild(child));
+    // 			}
+    // 		});
+    // 		this.children = this.children.filter(child => {
+    // 			return !child.process!.killed;
+    // 		});
+    // 		return result;
+    // 	} else {
+    // 		return result;
+    // 	}
+    // }
+    killChild(child) {
         // kill running instance process by PID | Name | ID
-        let result = [];
-        const children = this.getRunningChild(query);
-        //TODO: c9 integration
-        //child_process.exec(`pkill -P ${instance.pid}`);
-        if (children.length > 0) {
-            children.forEach(child => {
-                child.process.kill();
-                if (child.process.killed) {
-                    result.push(this.formatChild(child));
-                }
-            });
-            this.children = this.children.filter(child => {
-                return !child.process.killed;
-            });
-            return result;
-        }
-        else {
-            return result;
-        }
+        console.log('killing');
+        return new Promise((resolve, reject) => {
+            child.process.kill();
+            if (child.process.killed) {
+                // this.children = this.children.filter(child => {
+                // 	return child.process!.killed;
+                // });
+                this.children.splice(this.children.indexOf(child), 1);
+                resolve(this.formatChild(child));
+            }
+            else {
+                reject(this.formatChild(child));
+            }
+        });
     }
     formatStdOut(stdout, child) {
+        //format stdout to differentiate between errors and messages
         const data = stdout.toString();
-        if (data.indexOf('fatal') != -1) {
+        if (data.indexOf('fatal') != -1 || data.indexOf('ERR') != -1) {
             child.errors.push(data);
         }
         else {
@@ -395,6 +407,7 @@ class App {
         return child;
     }
     formatChild(child) {
+        //format server output to avoid JSON parse circular JSON exceptions
         return {
             repo: child.repo,
             name: child.name,
@@ -410,8 +423,15 @@ class App {
         };
     }
     cleanExit() {
-        let result = this.killChild(null);
-        console.log(`Killing ${result.length} child server processses.`);
+        // @ts-ignore
+        const children = this.getRunningChildren(null);
+        if (children) {
+            // @ts-ignore
+            children.forEach(child => {
+                this.killChild(child);
+            });
+        }
+        //console.log(`Killing ${result.length} child server processses.`);
         process.exit();
     }
 }
