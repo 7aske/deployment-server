@@ -8,7 +8,6 @@ import update from './routes/update.js';
 import remove from './routes/remove.js';
 import clear from './routes/clear.js';
 import browse from './routes/browse.js';
-import updater from './routes/updater.js';
 export default class Router {
 	public routes: express.Router;
 	constructor() {
@@ -25,7 +24,6 @@ export default class Router {
 		this.routes.use('/remove', remove);
 		this.routes.use('/clear', clear);
 		this.routes.use('/browse', browse);
-		this.routes.use('/updater', updater);
 	}
 }
 

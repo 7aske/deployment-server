@@ -490,30 +490,7 @@ export default class App {
 			errors: child.errors
 		};
 	}
-	public selfUpdate(): Promise<any> {
-		return new Promise((resolve, reject) => {
-			const git = child_process.execFile('git', ['pull']);
-			let response: any = {
-				messages: [],
-				errors: []
-			};
-			git.stderr.on('data', data => {
-				response = this.formatStdOut(data, response);
-			});
 
-			git.stdout.on('data', data => {
-				response = this.formatStdOut(data, response);
-			});
-			git.on('close', (code, signal) => {
-				if (process.env.NODE_ENV == 'dev') console.log('Git process exited with code', code);
-				if (code == 0 && response.errors.length == 0) {
-					resolve(response);
-				} else {
-					reject(response);
-				}
-			});
-		});
-	}
 	public cleanExit(): any {
 		// @ts-ignore
 		const children: Array<ChildServer> | null = this.getRunningChildren(null);

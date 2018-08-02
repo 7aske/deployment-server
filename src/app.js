@@ -458,31 +458,6 @@ class App {
             errors: child.errors
         };
     }
-    selfUpdate() {
-        return new Promise((resolve, reject) => {
-            const git = child_process.execFile('git', ['pull']);
-            let response = {
-                messages: [],
-                errors: []
-            };
-            git.stderr.on('data', data => {
-                response = this.formatStdOut(data, response);
-            });
-            git.stdout.on('data', data => {
-                response = this.formatStdOut(data, response);
-            });
-            git.on('close', (code, signal) => {
-                if (process.env.NODE_ENV == 'dev')
-                    console.log('Git process exited with code', code);
-                if (code == 0 && response.errors.length == 0) {
-                    resolve(response);
-                }
-                else {
-                    reject(response);
-                }
-            });
-        });
-    }
     cleanExit() {
         // @ts-ignore
         const children = this.getRunningChildren(null);
