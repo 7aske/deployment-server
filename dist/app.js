@@ -6,9 +6,9 @@ const path = require("path");
 class App {
     constructor(PORT) {
         this.children = [];
-        this.repoDir = 'public';
+        this.repoDir = 'dist/public';
         this.childrenJSON = `${this.repoDir}/children.json`;
-        this.defaultExpressServer = 'resources/server.js';
+        this.defaultExpressServer = 'dist/resources/server.js';
         this.childPort = PORT + 1;
         this.HTMLRegExp = new RegExp(/\.(html)$/i);
         this.init();

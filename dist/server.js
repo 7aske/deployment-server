@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = require("./src/app");
+const app_1 = require("./app");
 const bodyParser = require("body-parser");
 const express = require("express");
 const router_js_1 = require("./router.js");

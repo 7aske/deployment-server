@@ -5,7 +5,7 @@ const router: express.Router = express.Router();
 wrapper.use('/', router);
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 2999;
 const serverPORT: number = PORT + 1;
-let server: child_process.ChildProcess = child_process.execFile('node', ['server.js'], {
+let server: child_process.ChildProcess = child_process.execFile('node', ['./dist/server.js'], {
 	env: { PORT: serverPORT, NODE_ENV: 'dev' }
 });
 server.stdout.pipe(process.stdout);
@@ -42,7 +42,9 @@ router.post('/', (req: express.Request, res: express.Response) => {
 			server.kill();
 			setTimeout(() => {
 				if (server.killed) {
-					server = child_process.execFile('node', ['server.js'], { env: { PORT: serverPORT, NODE_ENV: 'dev' } });
+					server = child_process.execFile('node', ['./dist/server.js'], {
+						env: { PORT: serverPORT, NODE_ENV: 'dev' }
+					});
 					server.stdout.pipe(process.stdout);
 					server.stderr.pipe(process.stdout);
 					res.send(response);

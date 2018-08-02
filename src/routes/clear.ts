@@ -1,4 +1,4 @@
-import * as App from '../src/app';
+import * as App from '../app';
 import * as express from 'express';
 import server from '../server';
 

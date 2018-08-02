@@ -1,20 +1,26 @@
-import * as App from '../src/app';
+import * as App from '../app';
 import * as express from 'express';
 import server from '../server';
+const update = express.Router();
 
-const run = express.Router();
-run.post('/', async (req: express.Request, res: express.Response) => {
+update.post('/', async (req: express.Request, res: express.Response) => {
 	if (process.env.NODE_ENV == 'dev') console.log(req.body);
-	const query: string | null = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query);
+	const query: string | null = req.body.query;
+	let result: Array<App.ChildServer> = server.app.getChildrenFromJSON(query);
 	let response: Array<App.ChildServer> = [];
 	let errors: Array<App.ChildServer> = [];
-	const result: Array<App.ChildServer> = server.app.getChildrenFromJSON(query);
-	if (process.env.NODE_ENV == 'dev') console.log(result.length + ' servers found');
 	if (result.length > 0) {
 		result.forEach(async (child, i, array) => {
 			try {
-				const newChild = await server.app.run(child);
-				response.push(server.app.formatChild(newChild));
+				const newChild = child;
+				newChild.messages = [];
+				await server.app.retrieve(newChild);
+			} catch (err) {
+				errors.push(err);
+			}
+			try {
+				const newChild = await server.app.install(child);
+				response.push(newChild);
 			} catch (err) {
 				errors.push(err);
 			}
@@ -31,4 +37,4 @@ run.post('/', async (req: express.Request, res: express.Response) => {
 	}
 });
 
-export default run;
+export default update;
