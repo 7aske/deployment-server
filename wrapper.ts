@@ -3,8 +3,9 @@ import * as express from 'express';
 const wrapper: express.Application = express();
 const router: express.Router = express.Router();
 wrapper.use('/', router);
-const PORT = process.env.PORT || 2999;
-let server: child_process.ChildProcess = child_process.execFile('node', ['server.js']);
+const PORT:number = process.env.PORT?parseInt(process.env.PORT) : 2999;
+const serverPORT:number = PORT + 1;
+let server: child_process.ChildProcess = child_process.execFile('node', ['server.js'],{env:{PORT:serverPORT}});
 server.stdout.pipe(process.stdout);
 server.stderr.pipe(process.stdout);
 function formatStdOut(stdout: string | Buffer, response: any): any {
@@ -22,7 +23,7 @@ router.get('/', (req: express.Request, res: express.Response) => {
 });
 router.post('/', (req: express.Request, res: express.Response) => {
 	server.kill();
-	const git = child_process.execFile('git', ['pull']);
+	const git = child_process.execFile('git', ['pull'],{env:{PORT:serverPORT}});
 	let response: any = {
 		messages: [],
 		errors: []
