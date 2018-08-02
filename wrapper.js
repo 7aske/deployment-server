@@ -5,8 +5,9 @@ const express = require("express");
 const wrapper = express();
 const router = express.Router();
 wrapper.use('/', router);
-const PORT = process.env.PORT || 2999;
-let server = child_process.execFile('node', ['server.js']);
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 2999;
+const serverPORT = PORT + 1;
+let server = child_process.execFile('node', ['server.js'], { env: { PORT: serverPORT } });
 server.stdout.pipe(process.stdout);
 server.stderr.pipe(process.stdout);
 function formatStdOut(stdout, response) {
@@ -25,7 +26,7 @@ router.get('/', (req, res) => {
 });
 router.post('/', (req, res) => {
     server.kill();
-    const git = child_process.execFile('git', ['pull']);
+    const git = child_process.execFile('git', ['pull'], { env: { PORT: serverPORT } });
     let response = {
         messages: [],
         errors: []
