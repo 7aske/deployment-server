@@ -1,13 +1,22 @@
 import * as child_process from 'child_process';
 import * as express from 'express';
+import { existsSync } from 'fs';
 const wrapper: express.Application = express();
 const router: express.Router = express.Router();
 wrapper.use('/', router);
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 2999;
 const serverPORT: number = PORT + 1;
-let server: child_process.ChildProcess = child_process.execFile('node', ['server.js'], {
-	env: { PORT: serverPORT, NODE_ENV: 'dev' }
-});
+let server: child_process.ChildProcess;
+if (existsSync('dist')) {
+	server = child_process.execFile('node', ['dist/server.js'], {
+		env: { PORT: serverPORT, NODE_ENV: 'dev' }
+	});
+} else {
+	server = child_process.execFile('node', ['server.js'], {
+		env: { PORT: serverPORT, NODE_ENV: 'dev' }
+	});
+}
+
 server.stdout.pipe(process.stdout);
 server.stderr.pipe(process.stdout);
 function formatStdOut(stdout: string | Buffer, response: any): any {

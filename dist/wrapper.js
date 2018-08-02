@@ -2,14 +2,23 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process = require("child_process");
 const express = require("express");
+const fs_1 = require("fs");
 const wrapper = express();
 const router = express.Router();
 wrapper.use('/', router);
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 2999;
 const serverPORT = PORT + 1;
-let server = child_process.execFile('node', ['server.js'], {
-    env: { PORT: serverPORT, NODE_ENV: 'dev' }
-});
+let server;
+if (fs_1.existsSync('dist')) {
+    server = child_process.execFile('node', ['dist/server.js'], {
+        env: { PORT: serverPORT, NODE_ENV: 'dev' }
+    });
+}
+else {
+    server = child_process.execFile('node', ['server.js'], {
+        env: { PORT: serverPORT, NODE_ENV: 'dev' }
+    });
+}
 server.stdout.pipe(process.stdout);
 server.stderr.pipe(process.stdout);
 function formatStdOut(stdout, response) {
