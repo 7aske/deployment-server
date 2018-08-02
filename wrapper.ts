@@ -3,9 +3,9 @@ import * as express from 'express';
 const wrapper: express.Application = express();
 const router: express.Router = express.Router();
 wrapper.use('/', router);
-const PORT:number = process.env.PORT?parseInt(process.env.PORT) : 2999;
-const serverPORT:number = PORT + 1;
-let server: child_process.ChildProcess = child_process.execFile('node', ['server.js'],{env:{PORT:serverPORT}});
+const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 2999;
+const serverPORT: number = PORT + 1;
+let server: child_process.ChildProcess = child_process.execFile('node', ['server.js'], { env: { PORT: serverPORT } });
 server.stdout.pipe(process.stdout);
 server.stderr.pipe(process.stdout);
 function formatStdOut(stdout: string | Buffer, response: any): any {
@@ -23,7 +23,7 @@ router.get('/', (req: express.Request, res: express.Response) => {
 });
 router.post('/', (req: express.Request, res: express.Response) => {
 	server.kill();
-	const git = child_process.execFile('git', ['pull'],{env:{PORT:serverPORT}});
+	const git = child_process.execFile('git', ['pull']);
 	let response: any = {
 		messages: [],
 		errors: []
@@ -38,7 +38,7 @@ router.post('/', (req: express.Request, res: express.Response) => {
 	git.on('close', code => {
 		if (process.env.NODE_ENV == 'dev') console.log('Git process exited with code', code);
 		if (code == 0 && response.errors.length == 0) {
-			server = child_process.execFile('node', ['server.js']);
+			server = child_process.execFile('node', ['server.js'], { env: { PORT: serverPORT } });
 			server.stdout.pipe(process.stdout);
 			server.stderr.pipe(process.stdout);
 			res.send(response);
