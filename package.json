@@ -4,7 +4,7 @@
 	"description": "Software to deploy apps to servers",
 	"main": "server.js",
 	"scripts": {
-		"start": "set NODE_ENV=dev&& nodemon server -w ./*.js",
+		"start": "node wrapper",
 		"c9start": "SRV=c9 node server",
 		"dev": "set NODE_ENV=dev&& nodemon server -w server.js"
 	},
