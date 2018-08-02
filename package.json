@@ -4,9 +4,9 @@
 	"description": "Software to deploy apps to servers",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server",
+		"start": "set NODE_ENV=dev&& nodemon server -w ./*.js",
 		"c9start": "SRV=c9 node server",
-		"dev": " set NODE_ENV=dev&& nodemon server -w server.js"
+		"dev": "set NODE_ENV=dev&& nodemon server -w server.js"
 	},
 	"keywords": [
 		"deployment",
@@ -21,6 +21,7 @@
 		"body-parser": "^1.18.3",
 		"express": "^4.16.3",
 		"morgan": "^1.9.0",
+		"nodemon": "^1.18.3",
 		"shortid": "^2.2.8"
 	}
 }
