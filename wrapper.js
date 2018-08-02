@@ -4,6 +4,7 @@ const child_process = require("child_process");
 const express = require("express");
 const wrapper = express();
 const router = express.Router();
+wrapper.use('/', router);
 const PORT = process.env.PORT || 2999;
 let server = child_process.execFile('node', ['server.js']);
 server.stdout.pipe(process.stdout);
@@ -19,6 +20,9 @@ function formatStdOut(stdout, response) {
     }
     return response;
 }
+router.get('/', (req, res) => {
+    res.send('Wrapper server');
+});
 router.post('/', (req, res) => {
     server.kill();
     const git = child_process.execFile('git', ['pull']);
