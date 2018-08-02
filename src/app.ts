@@ -171,7 +171,7 @@ export default class App {
 		});
 	}
 	public run(child: ChildServer): Promise<ChildServer> {
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			//const checkIfRunning = this.children.find(i => i.name == child.name || i.id == child.id);
 			if (fs.existsSync(`./${child.dir}/package.json`)) {
 				const childPackageJSON: childPackageJSON = JSON.parse(
@@ -194,7 +194,7 @@ export default class App {
 							//change entry point accordingly
 							main = 'server.js';
 						}
-						if (this.runTest(child, port, main)) {
+						if (await this.runTest(child, port, main)) {
 							if (process.env.NODE_ENV == 'dev') console.log('Tests return true');
 							let node: child_process.ChildProcess;
 							//TODO: c9 integration
