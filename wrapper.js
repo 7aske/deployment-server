@@ -25,7 +25,6 @@ router.get('/', (req, res) => {
     res.send('Wrapper server');
 });
 router.post('/', (req, res) => {
-    server.kill();
     const git = child_process.execFile('git', ['pull']);
     let response = {
         messages: [],
@@ -41,10 +40,19 @@ router.post('/', (req, res) => {
         if (process.env.NODE_ENV == 'dev')
             console.log('Git process exited with code', code);
         if (code == 0 && response.errors.length == 0) {
-            server = child_process.execFile('node', ['server.js'], { env: { PORT: serverPORT } });
-            server.stdout.pipe(process.stdout);
-            server.stderr.pipe(process.stdout);
-            res.send(response);
+            server.kill();
+            setTimeout(() => {
+                if (server.killed) {
+                    server = child_process.execFile('node', ['server.js'], { env: { PORT: serverPORT } });
+                    server.stdout.pipe(process.stdout);
+                    server.stderr.pipe(process.stdout);
+                    res.send(response);
+                }
+                else {
+                    response.errors.push('Could not kill server process');
+                    res.send(response);
+                }
+            }, 100);
         }
         else {
             res.send(response);

@@ -5,7 +5,6 @@
 	"main": "server.js",
 	"scripts": {
 		"start": "node wrapper",
-		"c9start": "SRV=c9 node server",
 		"dev": "set NODE_ENV=dev&& nodemon server -w server.js"
 	},
 	"keywords": [
