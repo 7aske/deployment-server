@@ -1,6 +1,5 @@
 import * as App from '../src/app';
 import * as express from 'express';
-import { platform } from 'os';
 import server from '../server';
 const update = express.Router();
 

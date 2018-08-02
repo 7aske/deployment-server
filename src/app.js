@@ -58,7 +58,7 @@ class App {
             git.stdout.on('data', data => {
                 child = this.formatStdOut(data, child);
             });
-            git.on('exit', (code, signal) => {
+            git.on('close', (code, signal) => {
                 if (process.env.NODE_ENV == 'dev')
                     console.log('NPM process exited with code', code);
                 if (code == 0 && child.errors.length == 0) {
@@ -66,7 +66,7 @@ class App {
                     resolve(child);
                 }
                 else {
-                    reject(child);
+                    reject(this.formatChildErrors(child));
                 }
             });
         });
@@ -102,18 +102,18 @@ class App {
                             resolve(child);
                         }
                         else {
-                            reject(child);
+                            reject(this.formatChildErrors(child));
                         }
                     });
                 }
                 else {
                     child.messages.push('NPM found no dependencies.');
-                    resolve(child);
+                    resolve(this.formatChildErrors(child));
                 }
             }
             else {
                 child.errors.push('Invalid package.json file');
-                reject(child);
+                reject(this.formatChildErrors(child));
             }
         });
     }
@@ -127,7 +127,7 @@ class App {
                     const port = this.getPort(child);
                     if (this.serverRunning(child.id)) {
                         child.errors.push('Server with that ID/Name is already running');
-                        reject(child);
+                        reject(this.formatChildErrors(child));
                     }
                     else {
                         //if entry point is an html file open a basic static server
@@ -163,18 +163,18 @@ class App {
                             if (process.env.NODE_ENV == 'dev')
                                 console.log('Tests return false');
                             child.errors.push('There is something wrong.');
-                            reject(child);
+                            reject(this.formatChildErrors(child));
                         }
                     }
                 }
                 else {
                     child.errors.push('Invalid package.json entry point.');
-                    reject(child);
+                    reject(this.formatChildErrors(child));
                 }
             }
             else {
                 child.errors.push('Invalid package.json file');
-                reject(child);
+                reject(this.formatChildErrors(child));
             }
         });
     }
@@ -217,7 +217,7 @@ class App {
                 if (this.serverRunning(child.id)) {
                     // @ts-ignore
                     const runningChild = this.getRunningChildren(child.id);
-                    runningChild ? this.killChild(runningChild) : reject(child);
+                    runningChild ? this.killChild(runningChild) : reject(this.formatChildErrors(child));
                 }
                 let error = false;
                 const rm = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
@@ -239,7 +239,7 @@ class App {
                 });
                 rm.on('close', data => {
                     if (error)
-                        reject(child);
+                        reject(this.formatChildErrors(child));
                     else {
                         // childrenJSON.children.splice(index, 1);
                         // fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
@@ -419,7 +419,7 @@ class App {
     formatStdOut(stdout, child) {
         //format stdout to differentiate between errors and messages
         const data = stdout.toString();
-        if (data.indexOf('fatal') != -1 || data.indexOf('ERR') != -1) {
+        if (data.indexOf('fatal') != -1 || data.indexOf('ERR') != -1 || data.indexOf('error') != -1) {
             child.errors.push(data);
         }
         else {
@@ -445,6 +445,43 @@ class App {
             port: child.port,
             pid: child.pid
         };
+    }
+    formatChildErrors(child) {
+        //format server output to avoid JSON parse circular JSON exceptions
+        return {
+            repo: child.repo,
+            name: child.name,
+            dir: child.dir,
+            id: child.id,
+            platform: child.platform,
+            messages: child.messages,
+            errors: child.errors
+        };
+    }
+    selfUpdate() {
+        return new Promise((resolve, reject) => {
+            const git = child_process.execFile('git', ['pull']);
+            let response = {
+                messages: [],
+                errors: []
+            };
+            git.stderr.on('data', data => {
+                response = this.formatStdOut(data, response);
+            });
+            git.stdout.on('data', data => {
+                response = this.formatStdOut(data, response);
+            });
+            git.on('close', (code, signal) => {
+                if (process.env.NODE_ENV == 'dev')
+                    console.log('Git process exited with code', code);
+                if (code == 0 && response.errors.length == 0) {
+                    resolve(response);
+                }
+                else {
+                    reject(response);
+                }
+            });
+        });
     }
     cleanExit() {
         // @ts-ignore
