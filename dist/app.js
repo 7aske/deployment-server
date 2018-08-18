@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process = require("child_process");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 class App {
     constructor(PORT) {
@@ -62,7 +63,9 @@ class App {
                 if (process.env.NODE_ENV == 'dev')
                     console.log('NPM process exited with code', code);
                 if (code == 0 && child.errors.length == 0) {
-                    pull ? (child.dateLastUpdated = new Date()) : (child.dateDeployed = new Date());
+                    pull
+                        ? (child.dateLastUpdated = new Date())
+                        : (child.dateDeployed = new Date());
                     resolve(child);
                 }
                 else {
@@ -217,10 +220,24 @@ class App {
                 if (this.serverRunning(child.id)) {
                     // @ts-ignore
                     const runningChild = this.getRunningChildren(child.id);
-                    runningChild ? this.killChild(runningChild) : reject(this.formatChildErrors(child));
+                    runningChild
+                        ? this.killChild(runningChild)
+                        : reject(this.formatChildErrors(child));
                 }
                 let error = false;
-                const rm = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
+                let rm;
+                if (os.platform() == 'win32') {
+                    rm = child_process.exec(`rd /s /q ${path.join(process.cwd(), child.dir)}`);
+                }
+                else if (os.platform() == 'linux' ||
+                    os.platform() == 'darwin') {
+                    rm = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
+                }
+                else {
+                    return reject({
+                        errors: ['Unsupported platform']
+                    });
+                }
                 if (process.env.NODE_ENV == 'dev') {
                     //pipe output to main process for debugging
                     rm.stderr.pipe(process.stdout);
@@ -419,7 +436,9 @@ class App {
     formatStdOut(stdout, child) {
         //format stdout to differentiate between errors and messages
         const data = stdout.toString();
-        if (data.indexOf('fatal') != -1 || data.indexOf('ERR') != -1 || data.indexOf('error') != -1) {
+        if (data.indexOf('fatal') != -1 ||
+            data.indexOf('ERR') != -1 ||
+            data.indexOf('error') != -1) {
             child.errors.push(data);
         }
         else {
