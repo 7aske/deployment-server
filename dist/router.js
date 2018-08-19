@@ -13,7 +13,7 @@ const browse_js_1 = require("./routes/browse.js");
 class Router {
     constructor() {
         this.routes = express.Router();
-        this.routes.use(morgan('dev'));
+        this.routes.use(morgan(':method :url HTTP/:http-version :status :res[content-length] - :response-time m'));
         this.routes.get('/', (req, res) => {
             res.send('Hello!');
         });

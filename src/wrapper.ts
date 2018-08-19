@@ -8,17 +8,15 @@ const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 2999;
 const serverPORT: number = PORT + 1;
 let server: child_process.ChildProcess;
 if (existsSync('dist')) {
-	server = child_process.execFile('node', ['dist/server.js'], {
+	server = child_process.fork('dist/server.js', [], {
 		env: { PORT: serverPORT, NODE_ENV: 'dev' }
 	});
 } else {
-	server = child_process.execFile('node', ['server.js'], {
+	server = child_process.fork('server.js', [], {
 		env: { PORT: serverPORT, NODE_ENV: 'dev' }
 	});
 }
 
-server.stdout.pipe(process.stdout);
-server.stderr.pipe(process.stdout);
 function formatStdOut(stdout: string | Buffer, response: any): any {
 	//format stdout to differentiate between errors and messages
 	const data = stdout.toString();
@@ -56,11 +54,15 @@ router.post('/', (req: express.Request, res: express.Response) => {
 		if (code == 0 && response.errors.length == 0) {
 			setTimeout(() => {
 				if (server.killed) {
-					server = child_process.execFile('node', ['server.js'], {
-						env: { PORT: serverPORT, NODE_ENV: 'dev' }
-					});
-					server.stdout.pipe(process.stdout);
-					server.stderr.pipe(process.stdout);
+					if (existsSync('dist')) {
+						server = child_process.fork('dist/server.js', [], {
+							env: { PORT: serverPORT, NODE_ENV: 'dev' }
+						});
+					} else {
+						server = child_process.fork('server.js', [], {
+							env: { PORT: serverPORT, NODE_ENV: 'dev' }
+						});
+					}
 					res.send(response);
 				} else {
 					response.errors.push('Could not kill server process');
@@ -68,11 +70,15 @@ router.post('/', (req: express.Request, res: express.Response) => {
 				}
 			}, 100);
 		} else {
-			server = child_process.execFile('node', ['server.js'], {
-				env: { PORT: serverPORT, NODE_ENV: 'dev' }
-			});
-			server.stdout.pipe(process.stdout);
-			server.stderr.pipe(process.stdout);
+			if (existsSync('dist')) {
+				server = child_process.fork('dist/server.js', [], {
+					env: { PORT: serverPORT, NODE_ENV: 'dev' }
+				});
+			} else {
+				server = child_process.fork('server.js', [], {
+					env: { PORT: serverPORT, NODE_ENV: 'dev' }
+				});
+			}
 			res.send(response);
 			res.send(response);
 		}

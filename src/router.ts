@@ -12,7 +12,11 @@ export default class Router {
 	public routes: express.Router;
 	constructor() {
 		this.routes = express.Router();
-		this.routes.use(morgan('dev'));
+		this.routes.use(
+			morgan(
+				':method :url HTTP/:http-version :status :res[content-length] - :response-time m'
+			)
+		);
 		this.routes.get('/', (req: express.Request, res: express.Response) => {
 			res.send('Hello!');
 		});
