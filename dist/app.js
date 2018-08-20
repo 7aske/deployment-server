@@ -6,6 +6,7 @@ const os = require("os");
 const path = require("path");
 class App {
     constructor(PORT) {
+        console.log(process.cwd());
         this.children = [];
         this.repoDir = 'public';
         this.childrenJSON = `${this.repoDir}/children.json`;
@@ -83,8 +84,13 @@ class App {
                 if (childPackageJSON.dependencies) {
                     child.dependencies = childPackageJSON.dependencies;
                     //const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
-                    //const npm = child_process.execFile('npm', ['install'], { cwd: path.join(process.cwd(), child.dir) });
-                    const npm = child_process.exec(`cd ./${child.dir} && npm install`);
+                    console.log(path.join(process.cwd(), child.dir));
+                    const npm = child_process.execFile('npm', ['install'], {
+                        cwd: path.join(process.cwd(), child.dir)
+                    });
+                    // const npm = child_process.exec(
+                    // 	`cd ./${child.dir} && npm install`
+                    // );
                     if (process.env.NODE_ENV == 'dev') {
                         //pipe output to main process for debugging
                         npm.stderr.pipe(process.stdout);
@@ -98,7 +104,7 @@ class App {
                     });
                     npm.on('close', (code, signal) => {
                         if (process.env.NODE_ENV == 'dev')
-                            console.log('NPM process exited with code', code);
+                            console.log('Git process exited with code', code);
                         if (code == 0 && child.errors.length == 0) {
                             child.dateLastUpdated = new Date();
                             this.setChildToJSON(child);
@@ -438,7 +444,8 @@ class App {
         const data = stdout.toString();
         if (data.indexOf('fatal') != -1 ||
             data.indexOf('ERR') != -1 ||
-            data.indexOf('error') != -1) {
+            data.indexOf('error') != -1 ||
+            data.indexOf('not found')) {
             child.errors.push(data);
         }
         else {

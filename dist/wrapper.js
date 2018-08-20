@@ -88,6 +88,21 @@ router.post('/', (req, res) => {
         }
     });
 });
+wrapper.on('exit', () => {
+    if (server)
+        server.kill();
+    process.stdout.write('Killing server');
+});
+wrapper.on('SIGTERM', () => {
+    if (server)
+        server.kill();
+    process.stdout.write('Killing server');
+});
+wrapper.on('SIGKILL', () => {
+    if (server)
+        server.kill();
+    process.stdout.write('Killing server');
+});
 wrapper.listen(PORT, () => {
     console.log('Wrapper running on port ' + PORT);
 });

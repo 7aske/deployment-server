@@ -60,7 +60,6 @@ export default class App {
 	protected HTMLRegExp: RegExp;
 	constructor(PORT: number) {
 		console.log(process.cwd());
-
 		this.children = [];
 		this.repoDir = 'public';
 		this.childrenJSON = `${this.repoDir}/children.json`;
@@ -150,10 +149,14 @@ export default class App {
 				if (childPackageJSON.dependencies) {
 					child.dependencies = childPackageJSON.dependencies;
 					//const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
-					//const npm = child_process.execFile('npm', ['install'], { cwd: path.join(process.cwd(), child.dir) });
-					const npm = child_process.exec(
-						`cd ./${child.dir} && npm install`
-					);
+					console.log(path.join(process.cwd(), child.dir));
+
+					const npm = child_process.execFile('npm', ['install'], {
+						cwd: path.join(process.cwd(), child.dir)
+					});
+					// const npm = child_process.exec(
+					// 	`cd ./${child.dir} && npm install`
+					// );
 					if (process.env.NODE_ENV == 'dev') {
 						//pipe output to main process for debugging
 						npm.stderr.pipe(process.stdout);
@@ -555,7 +558,8 @@ export default class App {
 		if (
 			data.indexOf('fatal') != -1 ||
 			data.indexOf('ERR') != -1 ||
-			data.indexOf('error') != -1
+			data.indexOf('error') != -1 ||
+			data.indexOf('not found')
 		) {
 			child.errors.push(data);
 		} else {
