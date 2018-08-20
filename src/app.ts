@@ -59,6 +59,8 @@ export default class App {
 	protected defaultExpressServer: string; // location of a simple code for a basic express server;
 	protected HTMLRegExp: RegExp;
 	constructor(PORT: number) {
+		console.log(process.cwd());
+
 		this.children = [];
 		this.repoDir = 'public';
 		this.childrenJSON = `${this.repoDir}/children.json`;
@@ -165,7 +167,7 @@ export default class App {
 					});
 					npm.on('close', (code, signal) => {
 						if (process.env.NODE_ENV == 'dev')
-							console.log('NPM process exited with code', code);
+							console.log('Git process exited with code', code);
 						if (code == 0 && child.errors.length == 0) {
 							child.dateLastUpdated = new Date();
 							this.setChildToJSON(child);

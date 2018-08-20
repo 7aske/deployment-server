@@ -10,17 +10,15 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 2999;
 const serverPORT = PORT + 1;
 let server;
 if (fs_1.existsSync('dist')) {
-    server = child_process.execFile('node', ['dist/server.js'], {
+    server = child_process.fork('dist/server.js', [], {
         env: { PORT: serverPORT, NODE_ENV: 'dev' }
     });
 }
 else {
-    server = child_process.execFile('node', ['server.js'], {
+    server = child_process.fork('server.js', [], {
         env: { PORT: serverPORT, NODE_ENV: 'dev' }
     });
 }
-server.stdout.pipe(process.stdout);
-server.stderr.pipe(process.stdout);
 function formatStdOut(stdout, response) {
     //format stdout to differentiate between errors and messages
     const data = stdout.toString();
@@ -56,11 +54,16 @@ router.post('/', (req, res) => {
         if (code == 0 && response.errors.length == 0) {
             setTimeout(() => {
                 if (server.killed) {
-                    server = child_process.execFile('node', ['server.js'], {
-                        env: { PORT: serverPORT, NODE_ENV: 'dev' }
-                    });
-                    server.stdout.pipe(process.stdout);
-                    server.stderr.pipe(process.stdout);
+                    if (fs_1.existsSync('dist')) {
+                        server = child_process.fork('dist/server.js', [], {
+                            env: { PORT: serverPORT, NODE_ENV: 'dev' }
+                        });
+                    }
+                    else {
+                        server = child_process.fork('server.js', [], {
+                            env: { PORT: serverPORT, NODE_ENV: 'dev' }
+                        });
+                    }
                     res.send(response);
                 }
                 else {
@@ -70,11 +73,16 @@ router.post('/', (req, res) => {
             }, 100);
         }
         else {
-            server = child_process.execFile('node', ['server.js'], {
-                env: { PORT: serverPORT, NODE_ENV: 'dev' }
-            });
-            server.stdout.pipe(process.stdout);
-            server.stderr.pipe(process.stdout);
+            if (fs_1.existsSync('dist')) {
+                server = child_process.fork('dist/server.js', [], {
+                    env: { PORT: serverPORT, NODE_ENV: 'dev' }
+                });
+            }
+            else {
+                server = child_process.fork('server.js', [], {
+                    env: { PORT: serverPORT, NODE_ENV: 'dev' }
+                });
+            }
             res.send(response);
             res.send(response);
         }
