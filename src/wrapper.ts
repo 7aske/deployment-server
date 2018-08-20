@@ -85,11 +85,17 @@ router.post('/', (req: express.Request, res: express.Response) => {
 	});
 });
 process.on('exit', () => {
-	if (server) server.kill();
+	if (server) {
+		process.exit();
+		server.kill();
+	}
 	console.log('Killing server');
 });
 process.on('SIGTERM', signal => {
-	if (server) server.kill();
+	if (server) {
+		server.kill();
+		process.exit();
+	}
 	console.log('Killing server');
 });
 wrapper.listen(PORT, () => {

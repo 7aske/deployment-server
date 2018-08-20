@@ -89,13 +89,17 @@ router.post('/', (req, res) => {
     });
 });
 process.on('exit', () => {
-    if (server)
+    if (server) {
+        process.exit();
         server.kill();
+    }
     console.log('Killing server');
 });
 process.on('SIGTERM', signal => {
-    if (server)
+    if (server) {
         server.kill();
+        process.exit();
+    }
     console.log('Killing server');
 });
 wrapper.listen(PORT, () => {
