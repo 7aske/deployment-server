@@ -89,7 +89,8 @@ router.post('/', (req, res) => {
     });
 });
 process.on('message', data => {
-    console.log(data);
+    if (data.action == 'KYS')
+        process.kill(0);
 });
 process.on('exit', () => {
     if (server)
