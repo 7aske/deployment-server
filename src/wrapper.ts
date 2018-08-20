@@ -84,6 +84,9 @@ router.post('/', (req: express.Request, res: express.Response) => {
 		}
 	});
 });
+process.on('message', data => {
+	console.log(data);
+});
 process.on('exit', () => {
 	if (server) server.kill();
 	console.log('Killing server');

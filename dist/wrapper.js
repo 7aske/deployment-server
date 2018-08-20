@@ -88,6 +88,9 @@ router.post('/', (req, res) => {
         }
     });
 });
+process.on('message', data => {
+    console.log(data);
+});
 process.on('exit', () => {
     if (server)
         server.kill();
