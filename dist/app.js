@@ -104,7 +104,7 @@ class App {
                     });
                     npm.on('close', (code, signal) => {
                         if (process.env.NODE_ENV == 'dev')
-                            console.log('Git process exited with code', code);
+                            console.log('NPM process exited with code', code);
                         if (code == 0 && child.errors.length == 0) {
                             child.dateLastUpdated = new Date();
                             this.setChildToJSON(child);
