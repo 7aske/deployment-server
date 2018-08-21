@@ -127,13 +127,14 @@ export default class App {
 			});
 			git.on('close', (code, signal) => {
 				if (process.env.NODE_ENV == 'dev')
-					console.log('NPM process exited with code', code);
+					console.log('Git process exited with code', code);
 				if (code == 0 && child.errors.length == 0) {
 					pull
 						? (child.dateLastUpdated = new Date())
 						: (child.dateDeployed = new Date());
 					resolve(child);
 				} else {
+					console.log(child.errors);
 					reject(this.formatChildErrors(child));
 				}
 			});
