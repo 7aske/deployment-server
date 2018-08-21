@@ -21,11 +21,10 @@ if (process.platform == 'linux') {
 } else if (process.platform == 'win32') {
 	PATHS.node = execSync('where node')
 		.toString()
-		.slice(0, -2);
+		.split('\r\n')[0];
 	PATHS.npm = execSync('where npm')
 		.toString()
-		.slice(0, -2)
-		.split('\r')[0];
+		.split('\r\n')[1];
 }
 console.log(PATHS);
 

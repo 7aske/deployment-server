@@ -20,11 +20,10 @@ if (process.platform == 'linux') {
 else if (process.platform == 'win32') {
     PATHS.node = child_process_1.execSync('where node')
         .toString()
-        .slice(0, -2);
+        .split('\r\n')[0];
     PATHS.npm = child_process_1.execSync('where npm')
         .toString()
-        .slice(0, -2)
-        .split('\r')[0];
+        .split('\r\n')[1];
 }
 console.log(PATHS);
 class Server {
