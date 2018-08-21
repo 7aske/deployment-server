@@ -7,35 +7,40 @@ interface PATHS {
 	npm: string;
 }
 const PATHS_config = join(__dirname, 'config/PATHS.json');
+let PATHS: PATHS = {
+	node: 'node',
+	npm: 'npm'
+};
 if (!existsSync(join(__dirname, 'config')))
 	mkdirSync(join(__dirname, 'config'));
-
-if (!existsSync(join(__dirname, 'config', 'PATHS.json')))
-	writeFileSync(
-		PATHS_config,
-		JSON.stringify({
-			node: 'node',
-			npm: 'npm'
-		}),
-		'utf8'
-	);
-
-const PATHS: PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
-if (process.platform == 'linux') {
-	PATHS.node = execSync('which node')
-		.toString()
-		.split('\n')[0];
-	PATHS.npm = execSync('which npm')
-		.toString()
-		.split('\n')[0];
-} else if (process.platform == 'win32') {
-	PATHS.node = execSync('where node')
-		.toString()
-		.split('\r\n')[0];
-	PATHS.npm = execSync('where npm')
-		.toString()
-		.split('\r\n')[1];
+if (!existsSync(join(__dirname, 'config', 'PATHS.json'))) {
+	if (process.platform == 'linux') {
+		PATHS.node = execSync('which node')
+			.toString()
+			.split('\n')[0];
+		PATHS.npm = execSync('which npm')
+			.toString()
+			.split('\n')[0];
+	} else if (process.platform == 'win32') {
+		PATHS.node = execSync('where node')
+			.toString()
+			.split('\r\n')[0];
+		PATHS.npm = execSync('where npm')
+			.toString()
+			.split('\r\n')[1];
+	}
+} else {
+	PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
 }
+// writeFileSync(
+// 	PATHS_config,
+// 	JSON.stringify({
+// 		node: 'node',
+// 		npm: 'npm'
+// 	}),
+// 	'utf8'
+// );
+
 writeFileSync(PATHS_config, JSON.stringify(PATHS), 'utf8');
 const wrapper: express.Application = express();
 const router: express.Router = express.Router();

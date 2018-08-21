@@ -5,30 +5,41 @@ const express = require("express");
 const path_1 = require("path");
 const fs_1 = require("fs");
 const PATHS_config = path_1.join(__dirname, 'config/PATHS.json');
+let PATHS = {
+    node: 'node',
+    npm: 'npm'
+};
 if (!fs_1.existsSync(path_1.join(__dirname, 'config')))
     fs_1.mkdirSync(path_1.join(__dirname, 'config'));
-if (!fs_1.existsSync(path_1.join(__dirname, 'config', 'PATHS.json')))
-    fs_1.writeFileSync(PATHS_config, JSON.stringify({
-        node: 'node',
-        npm: 'npm'
-    }), 'utf8');
-const PATHS = JSON.parse(fs_1.readFileSync(PATHS_config, 'utf8'));
-if (process.platform == 'linux') {
-    PATHS.node = child_process_1.execSync('which node')
-        .toString()
-        .split('\n')[0];
-    PATHS.npm = child_process_1.execSync('which npm')
-        .toString()
-        .split('\n')[0];
+if (!fs_1.existsSync(path_1.join(__dirname, 'config', 'PATHS.json'))) {
+    if (process.platform == 'linux') {
+        PATHS.node = child_process_1.execSync('which node')
+            .toString()
+            .split('\n')[0];
+        PATHS.npm = child_process_1.execSync('which npm')
+            .toString()
+            .split('\n')[0];
+    }
+    else if (process.platform == 'win32') {
+        PATHS.node = child_process_1.execSync('where node')
+            .toString()
+            .split('\r\n')[0];
+        PATHS.npm = child_process_1.execSync('where npm')
+            .toString()
+            .split('\r\n')[1];
+    }
 }
-else if (process.platform == 'win32') {
-    PATHS.node = child_process_1.execSync('where node')
-        .toString()
-        .split('\r\n')[0];
-    PATHS.npm = child_process_1.execSync('where npm')
-        .toString()
-        .split('\r\n')[1];
+else {
+    PATHS = JSON.parse(fs_1.readFileSync(PATHS_config, 'utf8'));
 }
+// writeFileSync(
+// 	PATHS_config,
+// 	JSON.stringify({
+// 		node: 'node',
+// 		npm: 'npm'
+// 	}),
+// 	'utf8'
+// );
 fs_1.writeFileSync(PATHS_config, JSON.stringify(PATHS), 'utf8');
 const wrapper = express();
 const router = express.Router();
