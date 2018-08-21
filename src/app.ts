@@ -134,7 +134,6 @@ export default class App {
 						: (child.dateDeployed = new Date());
 					resolve(child);
 				} else {
-					console.log(child.errors);
 					reject(this.formatChildErrors(child));
 				}
 			});
@@ -572,7 +571,7 @@ export default class App {
 			data.indexOf('fatal') != -1 ||
 			data.indexOf('ERR') != -1 ||
 			data.indexOf('error') != -1 ||
-			data.indexOf('not found')
+			data.indexOf('not found') != -1
 		) {
 			child.errors.push(data);
 		} else {

@@ -70,7 +70,6 @@ class App {
                     resolve(child);
                 }
                 else {
-                    console.log(child.errors);
                     reject(this.formatChildErrors(child));
                 }
             });
@@ -446,7 +445,7 @@ class App {
         if (data.indexOf('fatal') != -1 ||
             data.indexOf('ERR') != -1 ||
             data.indexOf('error') != -1 ||
-            data.indexOf('not found')) {
+            data.indexOf('not found') != -1) {
             child.errors.push(data);
         }
         else {
