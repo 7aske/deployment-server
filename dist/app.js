@@ -86,12 +86,6 @@ class App {
                     const npm = child_process.spawn(this.PATHS.npm, ['install'], {
                         cwd: path.join(process.cwd(), child.dir)
                     });
-                    // const npm = child_process.exec(
-                    // 	`${this.PATHS.npm} install`,
-                    // 	{
-                    // 		cwd: path.join(process.cwd(), child.dir)
-                    // 	}
-                    // );
                     if (process.env.NODE_ENV == 'dev') {
                         //pipe output to main process for debugging
                         npm.stderr.pipe(process.stdout);
