@@ -5,8 +5,8 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 class App {
-    constructor(PORT) {
-        console.log(process.cwd());
+    constructor(PORT, PATHS) {
+        this.PATHS = PATHS;
         this.children = [];
         this.repoDir = 'public';
         this.childrenJSON = `${this.repoDir}/children.json`;
@@ -85,7 +85,7 @@ class App {
                     child.dependencies = childPackageJSON.dependencies;
                     //const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
                     console.log(path.join(process.cwd(), child.dir));
-                    const npm = child_process.execFile('npm', ['install'], {
+                    const npm = child_process.execFile(this.PATHS.npm, ['install'], {
                         cwd: path.join(process.cwd(), child.dir)
                     });
                     // const npm = child_process.exec(
@@ -151,7 +151,7 @@ class App {
                                 console.log('Tests return true');
                             let node;
                             //TODO: c9 integration
-                            node = child_process.execFile('node', [main], {
+                            node = child_process.execFile(this.PATHS.node, [main], {
                                 cwd: path.join(process.cwd(), child.dir),
                                 env: { PORT: port }
                             });
@@ -194,7 +194,7 @@ class App {
             //preform a test
             let node;
             //TODO: c9 integration
-            node = child_process.execFile('node', [main], {
+            node = child_process.execFile(this.PATHS.node, [main], {
                 cwd: path.join(process.cwd(), child.dir),
                 env: { PORT: port }
             });

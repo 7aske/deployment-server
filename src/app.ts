@@ -50,7 +50,10 @@ export interface childPackageJSON {
 export interface childrenJSON {
 	children: Array<ChildServer>;
 }
-
+interface PATHS {
+	node: string;
+	npm: string;
+}
 export default class App {
 	protected childPort: number; // starting port for child servers
 	protected children: Array<ChildServer>; // array of active child servers
@@ -58,8 +61,9 @@ export default class App {
 	protected childrenJSON: string; // json file to store all installed child servers
 	protected defaultExpressServer: string; // location of a simple code for a basic express server;
 	protected HTMLRegExp: RegExp;
-	constructor(PORT: number) {
-		console.log(process.cwd());
+	protected PATHS: PATHS;
+	constructor(PORT: number, PATHS: PATHS) {
+		this.PATHS = PATHS;
 		this.children = [];
 		this.repoDir = 'public';
 		this.childrenJSON = `${this.repoDir}/children.json`;
@@ -151,9 +155,13 @@ export default class App {
 					//const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
 					console.log(path.join(process.cwd(), child.dir));
 
-					const npm = child_process.execFile('npm', ['install'], {
-						cwd: path.join(process.cwd(), child.dir)
-					});
+					const npm = child_process.execFile(
+						this.PATHS.npm,
+						['install'],
+						{
+							cwd: path.join(process.cwd(), child.dir)
+						}
+					);
 					// const npm = child_process.exec(
 					// 	`cd ./${child.dir} && npm install`
 					// );
@@ -233,10 +241,14 @@ export default class App {
 								console.log('Tests return true');
 							let node: child_process.ChildProcess;
 							//TODO: c9 integration
-							node = child_process.execFile('node', [main], {
-								cwd: path.join(process.cwd(), child.dir),
-								env: { PORT: port }
-							});
+							node = child_process.execFile(
+								this.PATHS.node,
+								[main],
+								{
+									cwd: path.join(process.cwd(), child.dir),
+									env: { PORT: port }
+								}
+							);
 							if (process.env.NODE_ENV == 'dev') {
 								//pipe output to main process for debugging
 								node.stderr.pipe(process.stdout);
@@ -277,7 +289,7 @@ export default class App {
 			//preform a test
 			let node: child_process.ChildProcess;
 			//TODO: c9 integration
-			node = child_process.execFile('node', [main], {
+			node = child_process.execFile(this.PATHS.node, [main], {
 				cwd: path.join(process.cwd(), child.dir),
 				env: { PORT: port }
 			});
