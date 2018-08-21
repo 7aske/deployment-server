@@ -2,27 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const express = require("express");
+const path_1 = require("path");
 const fs_1 = require("fs");
-const PATHS = {
-    node: 'node',
-    npm: 'npm'
-};
+const PATHS_config = path_1.join(__dirname, 'config/PATHS.json');
+const PATHS = JSON.parse(fs_1.readFileSync(PATHS_config, 'utf8'));
 if (process.platform == 'linux') {
     PATHS.node = child_process_1.execSync('which node')
         .toString()
-        .slice(0, -1);
+        .split('\n')[0];
     PATHS.npm = child_process_1.execSync('which npm')
         .toString()
-        .slice(0, -1);
+        .split('\n')[0];
 }
 else if (process.platform == 'win32') {
     PATHS.node = child_process_1.execSync('where node')
         .toString()
-        .slice(0, -1);
+        .split('\r\n')[0];
     PATHS.npm = child_process_1.execSync('where npm')
         .toString()
-        .slice(0, -1);
+        .split('\r\n')[1];
 }
+fs_1.writeFileSync(PATHS_config, JSON.stringify(PATHS), 'utf8');
 const wrapper = express();
 const router = express.Router();
 wrapper.use('/', router);

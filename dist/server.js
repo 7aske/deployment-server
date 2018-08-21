@@ -1,30 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./app");
-const child_process_1 = require("child_process");
 const bodyParser = require("body-parser");
 const express = require("express");
 const router_js_1 = require("./router.js");
-const PATHS = {
-    node: 'node',
-    npm: 'npm'
-};
-if (process.platform == 'linux') {
-    PATHS.node = child_process_1.execSync('which node')
-        .toString()
-        .slice(0, -1);
-    PATHS.npm = child_process_1.execSync('which npm')
-        .toString()
-        .slice(0, -1);
-}
-else if (process.platform == 'win32') {
-    PATHS.node = child_process_1.execSync('where node')
-        .toString()
-        .split('\r\n')[0];
-    PATHS.npm = child_process_1.execSync('where npm')
-        .toString()
-        .split('\r\n')[1];
-}
+const fs_1 = require("fs");
+const path_1 = require("path");
+const PATHS_config = path_1.join(__dirname, 'config/PATHS.json');
+let PATHS = JSON.parse(fs_1.readFileSync(PATHS_config, 'utf8'));
 console.log(PATHS);
 class Server {
     constructor() {

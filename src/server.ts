@@ -1,33 +1,16 @@
 import App from './app';
-import { execSync } from 'child_process';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import Router from './router.js';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 interface PATHS {
 	node: string;
 	npm: string;
 }
-const PATHS: PATHS = {
-	node: 'node',
-	npm: 'npm'
-};
-if (process.platform == 'linux') {
-	PATHS.node = execSync('which node')
-		.toString()
-		.slice(0, -1);
-	PATHS.npm = execSync('which npm')
-		.toString()
-		.slice(0, -1);
-} else if (process.platform == 'win32') {
-	PATHS.node = execSync('where node')
-		.toString()
-		.split('\r\n')[0];
-	PATHS.npm = execSync('where npm')
-		.toString()
-		.split('\r\n')[1];
-}
+const PATHS_config = join(__dirname, 'config/PATHS.json');
+let PATHS: PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
 console.log(PATHS);
-
 class Server {
 	protected server: express.Application;
 	public PORT: number;

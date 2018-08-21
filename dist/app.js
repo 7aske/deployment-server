@@ -84,7 +84,6 @@ class App {
                 if (childPackageJSON.dependencies) {
                     child.dependencies = childPackageJSON.dependencies;
                     //const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
-                    console.log(path.join(process.cwd(), child.dir));
                     const npm = child_process.execFile(this.PATHS.npm, ['install'], {
                         cwd: path.join(process.cwd(), child.dir)
                     });

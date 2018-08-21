@@ -1,29 +1,29 @@
 import { fork, execSync, ChildProcess, execFile } from 'child_process';
 import * as express from 'express';
-import { existsSync } from 'fs';
+import { join } from 'path';
+import { existsSync, writeFileSync, readFileSync } from 'fs';
 interface PATHS {
 	node: string;
 	npm: string;
 }
-const PATHS: PATHS = {
-	node: 'node',
-	npm: 'npm'
-};
+const PATHS_config = join(__dirname, 'config/PATHS.json');
+const PATHS: PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
 if (process.platform == 'linux') {
 	PATHS.node = execSync('which node')
 		.toString()
-		.slice(0, -1);
+		.split('\n')[0];
 	PATHS.npm = execSync('which npm')
 		.toString()
-		.slice(0, -1);
+		.split('\n')[0];
 } else if (process.platform == 'win32') {
 	PATHS.node = execSync('where node')
 		.toString()
-		.slice(0, -1);
+		.split('\r\n')[0];
 	PATHS.npm = execSync('where npm')
 		.toString()
-		.slice(0, -1);
+		.split('\r\n')[1];
 }
+writeFileSync(PATHS_config, JSON.stringify(PATHS), 'utf8');
 const wrapper: express.Application = express();
 const router: express.Router = express.Router();
 wrapper.use('/', router);
