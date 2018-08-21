@@ -152,8 +152,7 @@ export default class App {
 				);
 				if (childPackageJSON.dependencies) {
 					child.dependencies = childPackageJSON.dependencies;
-					//const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
-					const npm = child_process.execFile(
+					const npm = child_process.spawn(
 						this.PATHS.npm,
 						['install'],
 						{
@@ -161,7 +160,10 @@ export default class App {
 						}
 					);
 					// const npm = child_process.exec(
-					// 	`cd ./${child.dir} && npm install`
+					// 	`${this.PATHS.npm} install`,
+					// 	{
+					// 		cwd: path.join(process.cwd(), child.dir)
+					// 	}
 					// );
 					if (process.env.NODE_ENV == 'dev') {
 						//pipe output to main process for debugging
@@ -285,12 +287,14 @@ export default class App {
 			console.log('Running tests on', child.name, 'repo');
 		return new Promise((resolve, reject) => {
 			//preform a test
-			let node: child_process.ChildProcess;
-			//TODO: c9 integration
-			node = child_process.execFile(this.PATHS.node, [main], {
-				cwd: path.join(process.cwd(), child.dir),
-				env: { PORT: port }
-			});
+			let node: child_process.ChildProcess = child_process.execFile(
+				this.PATHS.node,
+				[main],
+				{
+					cwd: path.join(process.cwd(), child.dir),
+					env: { PORT: port }
+				}
+			);
 			if (process.env.NODE_ENV == 'dev') {
 				//pipe output to main process for debugging
 				node.stderr.pipe(process.stdout);

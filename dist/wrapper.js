@@ -32,6 +32,8 @@ if (!fs_1.existsSync(path_1.join(__dirname, 'config', 'PATHS.json'))) {
 else {
     PATHS = JSON.parse(fs_1.readFileSync(PATHS_config, 'utf8'));
 }
+if (process.platform == 'linux')
+    child_process_1.execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
 // writeFileSync(
 // 	PATHS_config,
 // 	JSON.stringify({

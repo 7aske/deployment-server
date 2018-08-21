@@ -32,6 +32,8 @@ if (!existsSync(join(__dirname, 'config', 'PATHS.json'))) {
 } else {
 	PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
 }
+if (process.platform == 'linux')
+	execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
 // writeFileSync(
 // 	PATHS_config,
 // 	JSON.stringify({
@@ -40,7 +42,6 @@ if (!existsSync(join(__dirname, 'config', 'PATHS.json'))) {
 // 	}),
 // 	'utf8'
 // );
-
 writeFileSync(PATHS_config, JSON.stringify(PATHS), 'utf8');
 const wrapper: express.Application = express();
 const router: express.Router = express.Router();

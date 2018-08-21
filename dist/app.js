@@ -83,12 +83,14 @@ class App {
                 const childPackageJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), `${child.dir}/package.json`), 'utf8'));
                 if (childPackageJSON.dependencies) {
                     child.dependencies = childPackageJSON.dependencies;
-                    //const npm = child_process.exec(`cd .. && cd ./${child.dir} && echo %cd%`);
-                    const npm = child_process.execFile(this.PATHS.npm, ['install'], {
+                    const npm = child_process.spawn(this.PATHS.npm, ['install'], {
                         cwd: path.join(process.cwd(), child.dir)
                     });
                     // const npm = child_process.exec(
-                    // 	`cd ./${child.dir} && npm install`
+                    // 	`${this.PATHS.npm} install`,
+                    // 	{
+                    // 		cwd: path.join(process.cwd(), child.dir)
+                    // 	}
                     // );
                     if (process.env.NODE_ENV == 'dev') {
                         //pipe output to main process for debugging
@@ -191,9 +193,7 @@ class App {
             console.log('Running tests on', child.name, 'repo');
         return new Promise((resolve, reject) => {
             //preform a test
-            let node;
-            //TODO: c9 integration
-            node = child_process.execFile(this.PATHS.node, [main], {
+            let node = child_process.execFile(this.PATHS.node, [main], {
                 cwd: path.join(process.cwd(), child.dir),
                 env: { PORT: port }
             });
