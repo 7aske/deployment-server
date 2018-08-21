@@ -1,12 +1,25 @@
 import { fork, execSync, ChildProcess, execFile } from 'child_process';
 import * as express from 'express';
 import { join } from 'path';
-import { existsSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, writeFileSync, readFileSync, mkdirSync } from 'fs';
 interface PATHS {
 	node: string;
 	npm: string;
 }
 const PATHS_config = join(__dirname, 'config/PATHS.json');
+if (!existsSync(join(__dirname, 'config')))
+	mkdirSync(join(__dirname, 'config'));
+
+if (!existsSync(join(__dirname, 'config', 'PATHS.json')))
+	writeFileSync(
+		PATHS_config,
+		JSON.stringify({
+			node: 'node',
+			npm: 'npm'
+		}),
+		'utf8'
+	);
+
 const PATHS: PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
 if (process.platform == 'linux') {
 	PATHS.node = execSync('which node')
