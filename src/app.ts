@@ -71,7 +71,7 @@ export default class App {
     constructor(PORT: number, P: PATHS) {
         this.PATHS = P;
         this.children = [];
-        this.repoDir = "public";
+        this.repoDir = "deployment";
         this.childrenJSON = `${this.repoDir}/children.json`; // children.json filepath
         this.defaultExpressServer = "resources/server.js";
         this.childPort = PORT + 1;

@@ -15,7 +15,7 @@ var express_1 = __importDefault(require("express"));
 var fs_1 = require("fs");
 var path_1 = require("path");
 var app_1 = __importDefault(require("./app"));
-var router_js_1 = __importDefault(require("./router.js"));
+var router_1 = __importDefault(require("./router"));
 var PATHSConfig = path_1.join(__dirname, "config/PATHS.json");
 var PATHS = JSON.parse(fs_1.readFileSync(PATHSConfig, "utf8"));
 var Server = /** @class */ (function () {
@@ -26,7 +26,7 @@ var Server = /** @class */ (function () {
         this.server = express_1.default();
         this.server.use(bodyParser.json());
         this.server.use(bodyParser.urlencoded({ extended: true }));
-        this.server.use("/", new router_js_1.default().routes);
+        this.server.use("/", router_1.default);
         this.server.listen(this.PORT, function () {
             return console.log(_this.PORT);
         });

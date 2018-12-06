@@ -3,7 +3,7 @@ import express, { Application } from "express";
 import { readFileSync } from "fs";
 import { join } from "path";
 import App from "./app";
-import Router from "./router.js";
+import router from "./router";
 
 interface PATHS {
 	node: string;
@@ -24,7 +24,7 @@ class Server {
 		this.server = express();
 		this.server.use(bodyParser.json());
 		this.server.use(bodyParser.urlencoded({extended: true}));
-		this.server.use("/", new Router().routes);
+		this.server.use("/", router);
 		this.server.listen(this.PORT, () =>
 			console.log(this.PORT)
 		);

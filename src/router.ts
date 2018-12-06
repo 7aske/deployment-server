@@ -1,36 +1,30 @@
-import * as express from "express";
+import { Router } from "express";
 import morgan from "morgan";
-import browse from "./routes/browse.js";
-import clear from "./routes/clear.js";
-import deploy from "./routes/deploy.js";
-import find from "./routes/find.js";
-import kill from "./routes/kill.js";
-import remove from "./routes/remove.js";
-import run from "./routes/run.js";
-import update from "./routes/update.js";
+import root from "./client/root";
+import browse from "./server/browse";
+import clear from "./server/clear";
+import deploy from "./server/deploy";
+import find from "./server/find";
+import kill from "./server/kill";
+import remove from "./server/remove";
+import run from "./server/run";
+import update from "./server/update";
 
-export default class Router {
-	public routes: express.Router;
+const router = Router();
 
-	constructor() {
-		this.routes = express.Router();
-		this.routes.use(
-			morgan(
-				":method :url HTTP/:http-version :status :res[content-length] - :response-time m"
-			)
-		);
-		this.routes.get("/", (req: express.Request, res: express.Response) => {
-			res.send("Hello!");
-		});
-		this.routes.use("/deploy", deploy);
-		this.routes.use("/find", find);
-		this.routes.use("/kill", kill);
-		this.routes.use("/run", run);
-		this.routes.use("/update", update);
-		this.routes.use("/remove", remove);
-		this.routes.use("/clear", clear);
-		this.routes.use("/browse", browse);
-	}
-}
+router.use(
+	morgan(
+		":method :url HTTP/:http-version :status :res[content-length] - :response-time m"
+	)
+);
+router.use("/deploy", deploy);
+router.use("/find", find);
+router.use("/kill", kill);
+router.use("/run", run);
+router.use("/update", update);
+router.use("/remove", remove);
+router.use("/clear", clear);
+router.use("/browse", browse);
+router.use("/", root);
 
-// export default new Router().router;
+export default router;
