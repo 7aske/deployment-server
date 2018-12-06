@@ -122,13 +122,12 @@ export default class App {
             git.stdout.on("data", data => {
                 child = this.formatStdOut(data, child);
             });
-            git.on("close", (code, signal) => {
-                if (process.env.NODE_ENV == "dev") console.log("Git process exited with code", code);
+            git.on("close", code => {
                 if (code == 0 && child.errors.length == 0) {
                     pull ? (child.dateLastUpdated = new Date()) : (child.dateDeployed = new Date());
                     resolve(child);
                 } else {
-                    reject(this.formatChildErrors(child));
+                    reject(App.formatChildErrors(child));
                 }
             });
         });
@@ -158,23 +157,22 @@ export default class App {
                     npm.stdout.on("data", data => {
                         child = this.formatStdOut(data, child);
                     });
-                    npm.on("close", (code, signal) => {
-                        if (process.env.NODE_ENV == "dev") console.log("NPM process exited with code", code);
+                    npm.on("close", (code) => {
                         if (code == 0 && child.errors.length == 0) {
                             child.dateLastUpdated = new Date();
                             this.setChildToJSON(child);
                             resolve(child);
                         } else {
-                            reject(this.formatChildErrors(child));
+                            reject(App.formatChildErrors(child));
                         }
                     });
                 } else {
                     child.messages.push("NPM found no dependencies.");
-                    resolve(this.formatChildErrors(child));
+                    resolve(App.formatChildErrors(child));
                 }
             } else {
                 child.errors.push("Invalid package.json file");
-                reject(this.formatChildErrors(child));
+                reject(App.formatChildErrors(child));
             }
         });
     }
@@ -191,7 +189,7 @@ export default class App {
                     const port: number = this.getPort(child);
                     if (this.serverRunning(child.id)) {
                         child.errors.push("Server with that ID/Name is already running");
-                        reject(this.formatChildErrors(child));
+                        reject(App.formatChildErrors(child));
                     } else {
                         // if entry point is an html file open a basic static server
                         if (this.HTMLRegExp.test(main)) {
@@ -204,7 +202,6 @@ export default class App {
                             main = "server.js";
                         }
                         if (await this.runTest(child, port, main)) {
-                            if (process.env.NODE_ENV == "dev") console.log("Tests return true");
                             let node: ChildProcess;
                             // TODO: c9 integration
                             node = execFile(this.PATHS.node, [main], {
@@ -224,24 +221,22 @@ export default class App {
                             this.children.push(child);
                             resolve(child);
                         } else {
-                            if (process.env.NODE_ENV == "dev") console.log("Tests return false");
                             child.errors.push("There is something wrong.");
-                            reject(this.formatChildErrors(child));
+                            reject(App.formatChildErrors(child));
                         }
                     }
                 } else {
                     child.errors.push("Invalid package.json entry point.");
-                    reject(this.formatChildErrors(child));
+                    reject(App.formatChildErrors(child));
                 }
             } else {
                 child.errors.push("Invalid package.json file");
-                reject(this.formatChildErrors(child));
+                reject(App.formatChildErrors(child));
             }
         });
     }
 
     protected runTest(child: ChildServer, port: number, main: string): Promise<boolean> {
-        if (process.env.NODE_ENV == "dev") console.log("Running tests on", child.name, "repo");
         return new Promise((resolve, reject) => {
             // preform a test
             const node: ChildProcess = execFile(this.PATHS.node, [main], {
@@ -255,7 +250,6 @@ export default class App {
             }
             setTimeout(() => {
                 if (!node.killed) {
-                    if (process.env.NODE_ENV == "dev") console.log("Killing node process");
                     node.kill();
                 }
             }, 2000);
@@ -273,7 +267,7 @@ export default class App {
                 if (this.serverRunning(child.id)) {
                     // @ts-ignore
                     const runningChild: ChildServer | null = this.getRunningChildren(child.id);
-                    runningChild ? this.killChild(runningChild) : reject(this.formatChildErrors(child));
+                    runningChild ? this.killChild(runningChild) : reject(App.formatChildErrors(child));
                 }
                 let error: boolean = false;
 
@@ -303,8 +297,8 @@ export default class App {
                     child.errors.push(data.message);
                     error = true;
                 });
-                rm.on("close", data => {
-                    if (error) reject(this.formatChildErrors(child));
+                rm.on("close", () => {
+                    if (error) reject(App.formatChildErrors(child));
                     else {
                         this.updateChildrenJSON();
                         resolve(child);
@@ -354,7 +348,6 @@ export default class App {
             const child = childrenJSON.children.find(c => {
                 return c.id == query || c.name == query;
             });
-            console.log(childrenJSON.children);
             if (child) result.push(child);
             if (result.length > 0) return result;
             else return [];
@@ -383,8 +376,7 @@ export default class App {
         const child: ChildServer | undefined = this.children.find(
             c => c.id == query || c.name == query || c.pid == query
         );
-        if (child) return true;
-        else return false;
+        return !!child;
     }
 
     protected setChildToJSON(newChild: ChildServer): void {
@@ -462,15 +454,13 @@ export default class App {
 
     public killChild(child: ChildServer): Promise<ChildServer> {
         // kill running instance process by PID | Name | ID
-        console.log("killing");
-
         return new Promise((resolve, reject) => {
             child.process!.kill();
             if (child.process!.killed) {
                 this.children.splice(this.children.indexOf(child), 1);
-                resolve(this.formatChild(child));
+                resolve(App.formatChild(child));
             } else {
-                reject(this.formatChild(child));
+                reject(App.formatChild(child));
             }
         });
     }
@@ -491,7 +481,7 @@ export default class App {
         return child;
     }
 
-    public formatChild(child: ChildServer): ChildServer {
+    public static formatChild(child: ChildServer): ChildServer {
         // format server output to avoid JSON parse circular JSON exceptions
         return {
             action: child.action,
@@ -512,7 +502,7 @@ export default class App {
         };
     }
 
-    public formatChildErrors(child: ChildServer): ChildServer {
+    public static formatChildErrors(child: ChildServer): ChildServer {
         // format server output to avoid JSON parse circular JSON exceptions
         return {
             dir: child.dir,

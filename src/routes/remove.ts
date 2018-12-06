@@ -1,20 +1,19 @@
-import * as App from '../app';
-import * as express from 'express';
-import server from '../server';
+import { Request, Response, Router } from "express";
+import App, { ChildServer } from "../app";
+import server from "../server";
 
-const remove = express.Router();
-remove.post('/', async (req: express.Request, res: express.Response) => {
-	if (process.env.NODE_ENV == 'dev') console.log(req.body);
+const remove = Router();
+remove.post("/", async (req: Request, res: Response) => {
+	if (process.env.NODE_ENV == "dev") console.log(req.body);
 	const query: string | null = req.body.query ? req.body.query : null;
-	let response: Array<App.ChildServer> = [];
-	let errors: Array<App.ChildServer> = [];
-	const result: Array<App.ChildServer> = server.app.getChildrenFromJSON(query);
-	if (process.env.NODE_ENV == 'dev') console.log(result.length + ' servers found');
+	const response: ChildServer[] = [];
+	const errors: ChildServer[] = [];
+	const result: ChildServer[] = server.app.getChildrenFromJSON(query);
 	if (result.length > 0) {
 		result.forEach(async (child, i, array) => {
 			try {
 				const removedRepo = await server.app.remove(child);
-				response.push(server.app.formatChild(removedRepo));
+				response.push(App.formatChild(removedRepo));
 			} catch (err) {
 				errors.push(err);
 			}
@@ -25,8 +24,8 @@ remove.post('/', async (req: express.Request, res: express.Response) => {
 		});
 	} else {
 		res.send({
-			query: query,
-			errors: ['No repositories found']
+			errors: ["No repositories found"],
+			query
 		});
 	}
 });

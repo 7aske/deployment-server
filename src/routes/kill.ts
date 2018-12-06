@@ -1,16 +1,16 @@
-import * as App from '../app';
-import * as express from 'express';
-import server from '../server';
+import { Request, Response, Router } from "express";
+import { ChildServer } from "../app";
+import server from "../server";
 
-const kill = express.Router();
+const kill = Router();
 
-kill.post('/', async (req: express.Request, res: express.Response) => {
-	if (process.env.NODE_ENV == 'dev') console.log(req.body);
-	const query: number | string | null = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query);
-	const children: Array<App.ChildServer> | App.ChildServer | null = server.app.getRunningChildren(query);
+kill.post("/", async (req: Request, res: Response) => {
+	if (process.env.NODE_ENV == "dev") console.log(req.body);
+	const query: number | string | null = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query, 10);
+	const children: ChildServer[] | ChildServer | null = server.app.getRunningChildren(query);
 	if (children instanceof Array) {
-		let response: Array<App.ChildServer> = [];
-		let errors: Array<App.ChildServer> = [];
+		const response: ChildServer[] = [];
+		const errors: ChildServer[] = [];
 		children.forEach(async (child, i) => {
 			try {
 				const killed = await server.app.killChild(child);
@@ -32,9 +32,10 @@ kill.post('/', async (req: express.Request, res: express.Response) => {
 		}
 	} else {
 		res.send({
-			query: query,
-			errors: ['Invalid PID,ID or name']
-		});
+			errors: ["Invalid PID,ID or name"],
+			query
+		})
+		;
 	}
 });
 

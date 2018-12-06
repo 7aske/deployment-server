@@ -1,14 +1,15 @@
-import * as App from '../app';
-import * as express from 'express';
-import server from '../server';
-const update = express.Router();
+import { Request, Response,  Router } from "express";
+import { ChildServer } from "../app";
+import server from "../server";
 
-update.post('/', async (req: express.Request, res: express.Response) => {
-	if (process.env.NODE_ENV == 'dev') console.log(req.body);
+const update = Router();
+
+update.post("/", async (req: Request, res: Response) => {
+	if (process.env.NODE_ENV == "dev") console.log(req.body);
 	const query: string | null = req.body.query;
-	let result: Array<App.ChildServer> = server.app.getChildrenFromJSON(query);
-	let response: Array<App.ChildServer> = [];
-	let errors: Array<App.ChildServer> = [];
+	const result: ChildServer[] = server.app.getChildrenFromJSON(query);
+	const response: ChildServer[] = [];
+	const errors: ChildServer[] = [];
 	if (result.length > 0) {
 		result.forEach(async (child, i, array) => {
 			try {
@@ -31,8 +32,8 @@ update.post('/', async (req: express.Request, res: express.Response) => {
 		});
 	} else {
 		res.send({
-			query: query,
-			errors: ['No servers found']
+			errors: ["No servers found"],
+			query
 		});
 	}
 });

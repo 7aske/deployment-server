@@ -12,7 +12,9 @@
         "triple-equals": false,
         "arrow-parens": false,
         "no-console": false,
-        "curly": false
+        "curly": false,
+        "import-spacing": true,
+        "no-unsafe-any": false
     },
     "rulesDirectory": []
 }

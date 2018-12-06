@@ -1,22 +1,22 @@
-import * as App from '../app';
-import * as express from 'express';
-import server from '../server';
+import { Request, Response, Router } from "express";
+import App, { ChildServer } from "../app";
+import server from "../server";
 
-const find = express.Router();
+const find = Router();
 
-find.post('/', async (req: express.Request, res: express.Response) => {
-	if (process.env.NODE_ENV == 'dev') console.log(req.body);
+find.post("/", async (req: Request, res: Response) => {
+	if (process.env.NODE_ENV == "dev") console.log(req.body);
 	const query: number | string | null = req.body.query;
-	const result: Array<App.ChildServer> | App.ChildServer | null = server.app.getRunningChildren(query);
-	let response: Array<App.ChildServer> = [];
+	const result: ChildServer[] | ChildServer | null = server.app.getRunningChildren(query);
+	const response: ChildServer[] = [];
 	if (result instanceof Array) {
 		if (result.length > 0) {
 			result.forEach(child => {
-				response.push(server.app.formatChild(child));
+				response.push(App.formatChild(child));
 			});
 		}
 	} else if (result) {
-		response.push(server.app.formatChild(result));
+		response.push(App.formatChild(result));
 	}
 	res.send(response);
 });

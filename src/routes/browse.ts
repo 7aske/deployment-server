@@ -1,13 +1,13 @@
-import * as App from '../app';
-import * as express from 'express';
-import server from '../server';
+import { Request, Response, Router } from "express";
+import { ChildServer } from "../app";
+import server from "../server";
 
-const browse = express.Router();
+const browse = Router();
 
-browse.post('/', async (req: express.Request, res: express.Response) => {
-	if (process.env.NODE_ENV == 'dev') console.log(req.body);
+browse.post("/", async (req: Request, res: Response) => {
+	if (process.env.NODE_ENV == "dev") console.log(req.body);
 	const query: string | null = req.body.query;
-	const response: Array<App.ChildServer> = server.app.browse(query);
+	const response: ChildServer[] = server.app.browse(query);
 	res.send(response);
 });
 

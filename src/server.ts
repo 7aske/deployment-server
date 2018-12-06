@@ -1,29 +1,32 @@
-import App from './app';
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import Router from './router.js';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import * as bodyParser from "body-parser";
+import express, { Application } from "express";
+import { readFileSync } from "fs";
+import { join } from "path";
+import App from "./app";
+import Router from "./router.js";
+
 interface PATHS {
 	node: string;
 	npm: string;
 }
-const PATHS_config = join(__dirname, 'config/PATHS.json');
-let PATHS: PATHS = JSON.parse(readFileSync(PATHS_config, 'utf8'));
-console.log(PATHS);
+
+const PATHSConfig = join(__dirname, "config/PATHS.json");
+const PATHS: PATHS = JSON.parse(readFileSync(PATHSConfig, "utf8"));
+
 class Server {
-	protected server: express.Application;
+	protected server: Application;
 	public PORT: number;
 	public app: App;
+
 	constructor() {
-		this.PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+		this.PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 		this.app = new App(this.PORT, PATHS);
 		this.server = express();
 		this.server.use(bodyParser.json());
-		this.server.use(bodyParser.urlencoded({ extended: true }));
-		this.server.use('/', new Router().routes);
+		this.server.use(bodyParser.urlencoded({extended: true}));
+		this.server.use("/", new Router().routes);
 		this.server.listen(this.PORT, () =>
-			console.log(`Deployment server started on port ${this.PORT}`)
+			console.log(this.PORT)
 		);
 	}
 }
