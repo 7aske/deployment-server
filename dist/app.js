@@ -1,71 +1,60 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-const child_process = require("child_process");
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
+const child_process_1 = require("child_process");
+const fs_1 = require("fs");
+const os_1 = require("os");
+const path_1 = require("path");
 class App {
     constructor(PORT, PATHS) {
         this.PATHS = PATHS;
         this.children = [];
-        this.repoDir = 'public';
-        this.childrenJSON = `${this.repoDir}/children.json`;
-        this.defaultExpressServer = 'resources/server.js';
+        this.repoDir = "public";
+        this.childrenJSON = `${this.repoDir}/children.json`; // children.json filepath
+        this.defaultExpressServer = "resources/server.js";
         this.childPort = PORT + 1;
         this.HTMLRegExp = new RegExp(/\.(html)$/i);
         this.init();
     }
     init() {
-        if (!fs.existsSync(this.repoDir)) {
-            if (process.env.NODE_ENV == 'dev')
-                console.log('Creating', this.repoDir, 'dir');
-            fs.mkdirSync(this.repoDir);
-            fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify({
+        if (!fs_1.existsSync(this.repoDir)) {
+            fs_1.mkdirSync(this.repoDir);
+            fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify({
                 children: []
-            }), 'utf8');
+            }), "utf8");
         }
         else {
-            if (process.env.NODE_ENV == 'dev')
-                console.log('Updating', this.childrenJSON, 'file');
             this.updateChildrenJSON();
             this.sortChildrenJSON();
         }
     }
     retrieve(child) {
-        //let childrenJSON: any = JSON.parse(fs.readFileSync(this.childrenJSON, 'utf8'));
+        //let childrenJSON: any = JSON.parse(readFileSync(this.childrenJSON, 'utf8'));
         return new Promise((resolve, reject) => {
-            // check if the folder already exists to decide if pull or clone
-            const pull = fs.existsSync(path.join(process.cwd(), child.dir));
-            if (process.env.NODE_ENV == 'dev')
-                console.log(pull ? 'Pulling' : 'Cloning', child.repo);
+            // check if the folder already exists to decide whether pull or clone
+            const pull = fs_1.existsSync(path_1.join(process.cwd(), child.dir));
             const git = pull
-                ? child_process.execFile('git', [`pull`], {
-                    cwd: path.join(process.cwd(), child.dir)
+                ? child_process_1.execFile("git", [`pull`], {
+                    cwd: path_1.join(process.cwd(), child.dir)
                 })
-                : child_process.execFile('git', ['clone', child.repo], {
-                    cwd: path.join(process.cwd(), this.repoDir)
+                : child_process_1.execFile("git", ["clone", child.repo], {
+                    cwd: path_1.join(process.cwd(), this.repoDir)
                 });
-            // const git: child_process.ChildProcess = pull
-            // 	? child_process.exec(`cd ./${child.dir} && git pull`)
-            // 	: child_process.exec(`cd ./${this.repoDir} && git clone ${child.repo}`);
-            child.action = pull ? 'pull' : 'clone';
-            if (process.env.NODE_ENV == 'dev') {
+            child.action = pull ? "pull" : "clone";
+            if (process.env.NODE_ENV == "dev") {
                 //pipe output to main process for debugging
                 git.stderr.pipe(process.stdout);
                 git.stdout.pipe(process.stdout);
             }
-            git.stderr.on('data', data => {
+            git.stderr.on("data", data => {
                 child = this.formatStdOut(data, child);
             });
-            git.stdout.on('data', data => {
+            git.stdout.on("data", data => {
                 child = this.formatStdOut(data, child);
             });
-            git.on('close', (code, signal) => {
-                if (process.env.NODE_ENV == 'dev')
-                    console.log('Git process exited with code', code);
+            git.on("close", (code, signal) => {
+                if (process.env.NODE_ENV == "dev")
+                    console.log("Git process exited with code", code);
                 if (code == 0 && child.errors.length == 0) {
-                    pull
-                        ? (child.dateLastUpdated = new Date())
-                        : (child.dateDeployed = new Date());
+                    pull ? (child.dateLastUpdated = new Date()) : (child.dateDeployed = new Date());
                     resolve(child);
                 }
                 else {
@@ -78,27 +67,27 @@ class App {
         return new Promise((resolve, reject) => {
             // npm doesnt seem to work with spawn
             // --prefix makes a lot of junk files
-            if (fs.existsSync(`./${child.dir}/package.json`)) {
-                const childPackageJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), `${child.dir}/package.json`), 'utf8'));
+            if (fs_1.existsSync(`./${child.dir}/package.json`)) {
+                const childPackageJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), `${child.dir}/package.json`), "utf8"));
                 if (childPackageJSON.dependencies) {
                     child.dependencies = childPackageJSON.dependencies;
-                    const npm = child_process.spawn(this.PATHS.npm, ['install'], {
-                        cwd: path.join(process.cwd(), child.dir)
+                    const npm = child_process_1.spawn(this.PATHS.npm, ["install"], {
+                        cwd: path_1.join(process.cwd(), child.dir)
                     });
-                    if (process.env.NODE_ENV == 'dev') {
+                    if (process.env.NODE_ENV == "dev") {
                         //pipe output to main process for debugging
                         npm.stderr.pipe(process.stdout);
                         npm.stdout.pipe(process.stdout);
                     }
-                    npm.stderr.on('data', data => {
+                    npm.stderr.on("data", data => {
                         child = this.formatStdOut(data, child);
                     });
-                    npm.stdout.on('data', data => {
+                    npm.stdout.on("data", data => {
                         child = this.formatStdOut(data, child);
                     });
-                    npm.on('close', (code, signal) => {
-                        if (process.env.NODE_ENV == 'dev')
-                            console.log('NPM process exited with code', code);
+                    npm.on("close", (code, signal) => {
+                        if (process.env.NODE_ENV == "dev")
+                            console.log("NPM process exited with code", code);
                         if (code == 0 && child.errors.length == 0) {
                             child.dateLastUpdated = new Date();
                             this.setChildToJSON(child);
@@ -110,12 +99,12 @@ class App {
                     });
                 }
                 else {
-                    child.messages.push('NPM found no dependencies.');
+                    child.messages.push("NPM found no dependencies.");
                     resolve(this.formatChildErrors(child));
                 }
             }
             else {
-                child.errors.push('Invalid package.json file');
+                child.errors.push("Invalid package.json file");
                 reject(this.formatChildErrors(child));
             }
         });
@@ -123,33 +112,33 @@ class App {
     run(child) {
         return new Promise(async (resolve, reject) => {
             //const checkIfRunning = this.children.find(i => i.name == child.name || i.id == child.id);
-            if (fs.existsSync(`./${child.dir}/package.json`)) {
-                const childPackageJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), `${child.dir}/package.json`), 'utf8'));
+            if (fs_1.existsSync(`./${child.dir}/package.json`)) {
+                const childPackageJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), `${child.dir}/package.json`), "utf8"));
                 if (childPackageJSON.main) {
                     let main = childPackageJSON.main;
                     const port = this.getPort(child);
                     if (this.serverRunning(child.id)) {
-                        child.errors.push('Server with that ID/Name is already running');
+                        child.errors.push("Server with that ID/Name is already running");
                         reject(this.formatChildErrors(child));
                     }
                     else {
                         //if entry point is an html file open a basic static server
                         if (this.HTMLRegExp.test(main)) {
-                            const serverCode = fs.readFileSync(path.join(process.cwd(), this.defaultExpressServer), 'utf8');
-                            fs.writeFileSync(path.join(process.cwd(), `${child.dir}/server.js`), serverCode, 'utf8');
+                            const serverCode = fs_1.readFileSync(path_1.join(process.cwd(), this.defaultExpressServer), "utf8");
+                            fs_1.writeFileSync(path_1.join(process.cwd(), `${child.dir}/server.js`), serverCode, "utf8");
                             //change entry point accordingly
-                            main = 'server.js';
+                            main = "server.js";
                         }
                         if (await this.runTest(child, port, main)) {
-                            if (process.env.NODE_ENV == 'dev')
-                                console.log('Tests return true');
+                            if (process.env.NODE_ENV == "dev")
+                                console.log("Tests return true");
                             let node;
                             //TODO: c9 integration
-                            node = child_process.execFile(this.PATHS.node, [main], {
-                                cwd: path.join(process.cwd(), child.dir),
+                            node = child_process_1.execFile(this.PATHS.node, [main], {
+                                cwd: path_1.join(process.cwd(), child.dir),
                                 env: { PORT: port }
                             });
-                            if (process.env.NODE_ENV == 'dev') {
+                            if (process.env.NODE_ENV == "dev") {
                                 //pipe output to main process for debugging
                                 node.stderr.pipe(process.stdout);
                                 node.stdout.pipe(process.stdout);
@@ -163,49 +152,49 @@ class App {
                             resolve(child);
                         }
                         else {
-                            if (process.env.NODE_ENV == 'dev')
-                                console.log('Tests return false');
-                            child.errors.push('There is something wrong.');
+                            if (process.env.NODE_ENV == "dev")
+                                console.log("Tests return false");
+                            child.errors.push("There is something wrong.");
                             reject(this.formatChildErrors(child));
                         }
                     }
                 }
                 else {
-                    child.errors.push('Invalid package.json entry point.');
+                    child.errors.push("Invalid package.json entry point.");
                     reject(this.formatChildErrors(child));
                 }
             }
             else {
-                child.errors.push('Invalid package.json file');
+                child.errors.push("Invalid package.json file");
                 reject(this.formatChildErrors(child));
             }
         });
     }
     runTest(child, port, main) {
-        if (process.env.NODE_ENV == 'dev')
-            console.log('Running tests on', child.name, 'repo');
+        if (process.env.NODE_ENV == "dev")
+            console.log("Running tests on", child.name, "repo");
         return new Promise((resolve, reject) => {
             //preform a test
-            let node = child_process.execFile(this.PATHS.node, [main], {
-                cwd: path.join(process.cwd(), child.dir),
+            let node = child_process_1.execFile(this.PATHS.node, [main], {
+                cwd: path_1.join(process.cwd(), child.dir),
                 env: { PORT: port }
             });
-            if (process.env.NODE_ENV == 'dev') {
+            if (process.env.NODE_ENV == "dev") {
                 //pipe output to main process for debugging
                 node.stderr.pipe(process.stdout);
                 node.stdout.pipe(process.stdout);
             }
             setTimeout(() => {
                 if (!node.killed) {
-                    if (process.env.NODE_ENV == 'dev')
-                        console.log('Killing node process');
+                    if (process.env.NODE_ENV == "dev")
+                        console.log("Killing node process");
                     node.kill();
                 }
             }, 2000);
-            node.on('close', (code, signal) => {
+            node.on("close", (code, signal) => {
                 if (code == 1)
                     reject(false);
-                else if ((signal = 'SIGTERM'))
+                else if ((signal = "SIGTERM"))
                     resolve(true);
                 else
                     reject(false);
@@ -218,46 +207,41 @@ class App {
                 if (this.serverRunning(child.id)) {
                     // @ts-ignore
                     const runningChild = this.getRunningChildren(child.id);
-                    runningChild
-                        ? this.killChild(runningChild)
-                        : reject(this.formatChildErrors(child));
+                    runningChild ? this.killChild(runningChild) : reject(this.formatChildErrors(child));
                 }
                 let error = false;
                 let rm;
-                if (os.platform() == 'win32') {
-                    rm = child_process.exec(`rd /s /q ${path.join(process.cwd(), child.dir)}`);
+                if (os_1.platform() == "win32") {
+                    rm = child_process_1.exec(`rd /s /q ${path_1.join(process.cwd(), child.dir)}`);
                 }
-                else if (os.platform() == 'linux' ||
-                    os.platform() == 'darwin') {
-                    rm = child_process.exec(`rm -r -f ${path.join(process.cwd(), child.dir)}`);
+                else if (os_1.platform() == "linux" || os_1.platform() == "darwin") {
+                    rm = child_process_1.exec(`rm -r -f ${path_1.join(process.cwd(), child.dir)}`);
                 }
                 else {
                     return reject({
-                        errors: ['Unsupported platform']
+                        errors: ["Unsupported platform"]
                     });
                 }
-                if (process.env.NODE_ENV == 'dev') {
+                if (process.env.NODE_ENV == "dev") {
                     //pipe output to main process for debugging
                     rm.stderr.pipe(process.stdout);
                     rm.stdout.pipe(process.stdout);
                 }
-                rm.stderr.on('data', data => {
+                rm.stderr.on("data", data => {
                     child.errors.push(data.toString());
                     error = true;
                 });
-                rm.stdout.on('data', data => {
+                rm.stdout.on("data", data => {
                     child.messages.push(data.toString());
                 });
-                rm.on('error', data => {
+                rm.on("error", data => {
                     child.errors.push(data.message);
                     error = true;
                 });
-                rm.on('close', data => {
+                rm.on("close", data => {
                     if (error)
                         reject(this.formatChildErrors(child));
                     else {
-                        // childrenJSON.children.splice(index, 1);
-                        // fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
                         this.updateChildrenJSON();
                         resolve(child);
                     }
@@ -265,14 +249,14 @@ class App {
             }
             else {
                 reject({
-                    errors: ['Invalid child object']
+                    errors: ["Invalid child object"]
                 });
             }
         });
     }
     clear(query) {
-        let childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
-        if (typeof query == 'string') {
+        let childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
+        if (typeof query == "string") {
             childrenJSON.children.forEach(child => {
                 if (child.id == query || child.name == query) {
                     child.messages = [];
@@ -296,13 +280,13 @@ class App {
                 child.errors = [];
             });
         }
-        fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
+        fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), "utf8");
         return true;
     }
     browse(query) {
-        const childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+        const childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         const result = [];
-        if (typeof query == 'string') {
+        if (typeof query == "string") {
             const child = childrenJSON.children.find(child => {
                 return child.id == query || child.name == query;
             });
@@ -321,7 +305,7 @@ class App {
     getPort(child) {
         //if child doesnt have predefined port
         //find first available port by searching through children.json children array
-        const childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+        const childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         if (childrenJSON.children.length == 0)
             return this.childPort;
         if (child.port) {
@@ -345,7 +329,7 @@ class App {
             return false;
     }
     setChildToJSON(newChild) {
-        const childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+        const childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         const child = childrenJSON.children.find(c => {
             return c.id == newChild.id;
         });
@@ -357,13 +341,13 @@ class App {
         else {
             childrenJSON.children.push(newChild);
         }
-        fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
+        fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), "utf8");
     }
     getChildrenFromJSON(query) {
         // get the information about a repo from repos folder using childs.json
-        const childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+        const childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         let result = [];
-        if (typeof query == 'string') {
+        if (typeof query == "string") {
             result = childrenJSON.children.filter(child => {
                 return child.id == query || child.name == query;
             });
@@ -379,17 +363,17 @@ class App {
     updateChildrenJSON() {
         // update children.json
         let result = [];
-        const repos = fs.readdirSync(this.repoDir, 'utf8');
-        let childrenJSON = JSON.parse(fs.readFileSync(this.childrenJSON, 'utf8'));
+        const repos = fs_1.readdirSync(this.repoDir, "utf8");
+        let childrenJSON = JSON.parse(fs_1.readFileSync(this.childrenJSON, "utf8"));
         childrenJSON.children.forEach(i => {
             if (repos.indexOf(i.name) != -1)
                 result.push(i);
         });
         this.childPort = 3001;
-        fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify({ children: result }), 'utf8');
+        fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify({ children: result }), "utf8");
     }
     sortChildrenJSON() {
-        let childrenJSON = JSON.parse(fs.readFileSync(path.join(process.cwd(), this.childrenJSON), 'utf8'));
+        let childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         if (childrenJSON.children.length > 1) {
             childrenJSON.children.sort((a, b) => {
                 // @ts-ignore
@@ -402,16 +386,16 @@ class App {
                 }
                 return 0;
             });
-            fs.writeFileSync(path.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), 'utf8');
+            fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), "utf8");
         }
     }
     getRunningChildren(query) {
         let result = [];
-        if (typeof query == 'string') {
+        if (typeof query == "string") {
             const child = this.children.find(child => child.id == query || child.name == query);
             return child ? child : null;
         }
-        if (typeof query == 'number') {
+        if (typeof query == "number") {
             const child = this.children.find(child => child.pid == query);
             return child ? child : null;
         }
@@ -419,7 +403,7 @@ class App {
     }
     killChild(child) {
         // kill running instance process by PID | Name | ID
-        console.log('killing');
+        console.log("killing");
         return new Promise((resolve, reject) => {
             child.process.kill();
             if (child.process.killed) {
@@ -434,10 +418,10 @@ class App {
     formatStdOut(stdout, child) {
         //format stdout to differentiate between errors and messages
         const data = stdout.toString();
-        if (data.indexOf('fatal') != -1 ||
-            data.indexOf('ERR') != -1 ||
-            data.indexOf('error') != -1 ||
-            data.indexOf('not found') != -1) {
+        if (data.indexOf("fatal") != -1 ||
+            data.indexOf("ERR") != -1 ||
+            data.indexOf("error") != -1 ||
+            data.indexOf("not found") != -1) {
             child.errors.push(data);
         }
         else {
