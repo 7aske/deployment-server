@@ -55,7 +55,7 @@ var Deployer = /** @class */ (function () {
         this.children = [];
         this.repoDir = "deployment";
         this.childrenJSON = this.repoDir + "/children.json"; // children.json filepath
-        this.defaultExpressServer = "resources/server.js";
+        this.defaultExpressServer = "dist/resources/server.js";
         this.childPort = PORT + 1;
         this.HTMLRegExp = new RegExp(/\.(html)$/i);
         this.init();
@@ -498,7 +498,7 @@ var Deployer = /** @class */ (function () {
             pid: child.pid,
             platform: child.platform,
             port: child.port,
-            repo: child.repo,
+            repo: child.repo
         };
     };
     Deployer.formatChildErrors = function (child) {
@@ -510,7 +510,7 @@ var Deployer = /** @class */ (function () {
             messages: child.messages,
             name: child.name,
             platform: child.platform,
-            repo: child.repo,
+            repo: child.repo
         };
     };
     return Deployer;

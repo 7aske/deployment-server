@@ -47,7 +47,6 @@ else {
 }
 if (process.platform == "linux" && !fs_1.existsSync("/usr/bin/node"))
     child_process_1.execSync("sudo ln -s " + PATHS.node + " /usr/bin/node");
-console.log(PATHS);
 fs_1.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 exports.deployer = new deployer_1.default(PORT, PATHS);
