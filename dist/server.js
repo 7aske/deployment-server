@@ -11,20 +11,49 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var bodyParser = __importStar(require("body-parser"));
+var child_process_1 = require("child_process");
 var express_1 = __importDefault(require("express"));
 var fs_1 = require("fs");
 var path_1 = require("path");
 var deployer_1 = __importDefault(require("./deployer"));
 var router_1 = __importDefault(require("./router"));
-var PATHSConfig = path_1.join(__dirname, "config/PATHS.json");
-var PATHS = JSON.parse(fs_1.readFileSync(PATHSConfig, "utf8"));
+var PATHSConfigFolder = path_1.join(process.cwd(), "config");
+var PATHSConfigFile = path_1.join(PATHSConfigFolder, "PATHS.json");
+var PATHS = {
+    node: "node",
+    npm: "npm"
+};
+if (!fs_1.existsSync(PATHSConfigFolder)) {
+    fs_1.mkdirSync(PATHSConfigFolder);
+    if (process.platform == "linux") {
+        PATHS.node = child_process_1.execSync("which node")
+            .toString()
+            .split("\n")[0];
+        PATHS.npm = child_process_1.execSync("which npm")
+            .toString()
+            .split("\n")[0];
+    }
+    else if (process.platform == "win32") {
+        PATHS.node = child_process_1.execSync("where node")
+            .toString()
+            .split("\r\n")[0];
+        PATHS.npm = child_process_1.execSync("where npm")
+            .toString()
+            .split("\r\n")[1];
+    }
+}
+else {
+    PATHS = JSON.parse(fs_1.readFileSync(PATHSConfigFile, "utf8"));
+}
+if (process.platform == "linux" && !fs_1.existsSync("/usr/bin/node"))
+    child_process_1.execSync("sudo ln -s " + PATHS.node + " /usr/bin/node");
+console.log(PATHS);
+fs_1.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 exports.deployer = new deployer_1.default(PORT, PATHS);
 var server = express_1.default();
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use("/", router_1.default);
-server.listen(PORT, function () {
-    return console.log(PORT);
-});
+server.listen(PORT, function () { return console.log(PORT); });
 exports.default = server;
