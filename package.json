@@ -4,8 +4,8 @@
 	"description": "Software to deploy apps to servers",
 	"main": "server.js",
 	"scripts": {
-		"start": "node ./dist/wrapper.js",
-		"dev": "NODE_ENV=dev nodemon ./dist/wrapper.js -w ./dist/*.js"
+		"start": "node ./dist/server.js",
+		"dev": "NODE_ENV=dev nodemon ./dist/server.js -w ./dist/*.js"
 	},
 	"keywords": [
 		"deployment",
