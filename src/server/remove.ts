@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
-import App, { ChildServer } from "../app";
-import server from "../server";
+import Deployer, { ChildServer } from "../deployer";
+import { deployer } from "../server";
 
 const remove = Router();
 remove.post("/", async (req: Request, res: Response) => {
@@ -8,12 +8,12 @@ remove.post("/", async (req: Request, res: Response) => {
 	const query: string | null = req.body.query ? req.body.query : null;
 	const response: ChildServer[] = [];
 	const errors: ChildServer[] = [];
-	const result: ChildServer[] = server.app.getChildrenFromJSON(query);
+	const result: ChildServer[] = deployer.getChildrenFromJSON(query);
 	if (result.length > 0) {
 		result.forEach(async (child, i, array) => {
 			try {
-				const removedRepo = await server.app.remove(child);
-				response.push(App.formatChild(removedRepo));
+				const removedRepo = await deployer.remove(child);
+				response.push(Deployer.formatChild(removedRepo));
 			} catch (err) {
 				errors.push(err);
 			}

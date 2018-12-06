@@ -40,8 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var app_1 = __importDefault(require("../app"));
-var server_1 = __importDefault(require("../server"));
+var deployer_1 = __importDefault(require("../deployer"));
+var server_1 = require("../server");
 var remove = express_1.Router();
 remove.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var query, response, errors, result;
@@ -52,7 +52,7 @@ remove.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
         query = req.body.query ? req.body.query : null;
         response = [];
         errors = [];
-        result = server_1.default.app.getChildrenFromJSON(query);
+        result = server_1.deployer.getChildrenFromJSON(query);
         if (result.length > 0) {
             result.forEach(function (child, i, array) { return __awaiter(_this, void 0, void 0, function () {
                 var removedRepo, err_1;
@@ -60,10 +60,10 @@ remove.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                     switch (_a.label) {
                         case 0:
                             _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, server_1.default.app.remove(child)];
+                            return [4 /*yield*/, server_1.deployer.remove(child)];
                         case 1:
                             removedRepo = _a.sent();
-                            response.push(app_1.default.formatChild(removedRepo));
+                            response.push(deployer_1.default.formatChild(removedRepo));
                             return [3 /*break*/, 3];
                         case 2:
                             err_1 = _a.sent();

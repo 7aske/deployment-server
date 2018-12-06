@@ -40,8 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var app_1 = __importDefault(require("../app"));
-var server_1 = __importDefault(require("../server"));
+var deployer_1 = __importDefault(require("../deployer"));
+var server_1 = require("../server");
 var find = express_1.Router();
 find.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var query, result, response;
@@ -49,17 +49,17 @@ find.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, fun
         if (process.env.NODE_ENV == "dev")
             console.log(req.body);
         query = req.body.query;
-        result = server_1.default.app.getRunningChildren(query);
+        result = server_1.deployer.getRunningChildren(query);
         response = [];
         if (result instanceof Array) {
             if (result.length > 0) {
                 result.forEach(function (child) {
-                    response.push(app_1.default.formatChild(child));
+                    response.push(deployer_1.default.formatChild(child));
                 });
             }
         }
         else if (result) {
-            response.push(app_1.default.formatChild(result));
+            response.push(deployer_1.default.formatChild(result));
         }
         res.send(response);
         return [2 /*return*/];

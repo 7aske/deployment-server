@@ -34,13 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var server_1 = __importDefault(require("../server"));
+var server_1 = require("../server");
 var kill = express_1.Router();
 kill.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var query, children, response_1, errors_1, killed, error_1;
@@ -51,7 +48,7 @@ kill.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, fun
                 if (process.env.NODE_ENV == "dev")
                     console.log(req.body);
                 query = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query, 10);
-                children = server_1.default.app.getRunningChildren(query);
+                children = server_1.deployer.getRunningChildren(query);
                 if (!(children instanceof Array)) return [3 /*break*/, 1];
                 response_1 = [];
                 errors_1 = [];
@@ -61,7 +58,7 @@ kill.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, fun
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 2, , 3]);
-                                return [4 /*yield*/, server_1.default.app.killChild(child)];
+                                return [4 /*yield*/, server_1.deployer.killChild(child)];
                             case 1:
                                 killed = _a.sent();
                                 if (killed)
@@ -88,7 +85,7 @@ kill.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, fun
                 _a.label = 2;
             case 2:
                 _a.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, server_1.default.app.killChild(children)];
+                return [4 /*yield*/, server_1.deployer.killChild(children)];
             case 3:
                 killed = _a.sent();
                 if (killed)

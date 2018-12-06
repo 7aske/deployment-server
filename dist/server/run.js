@@ -40,8 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var app_1 = __importDefault(require("../app"));
-var server_1 = __importDefault(require("../server"));
+var deployer_1 = __importDefault(require("../deployer"));
+var server_1 = require("../server");
 var run = express_1.Router();
 run.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var query, response, errors, result;
@@ -52,7 +52,7 @@ run.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, func
         query = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query, 10);
         response = [];
         errors = [];
-        result = server_1.default.app.getChildrenFromJSON(query);
+        result = server_1.deployer.getChildrenFromJSON(query);
         if (result.length > 0) {
             result.forEach(function (child, i, array) { return __awaiter(_this, void 0, void 0, function () {
                 var newChild, err_1;
@@ -60,10 +60,10 @@ run.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, func
                     switch (_a.label) {
                         case 0:
                             _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, server_1.default.app.run(child)];
+                            return [4 /*yield*/, server_1.deployer.run(child)];
                         case 1:
                             newChild = _a.sent();
-                            response.push(app_1.default.formatChild(newChild));
+                            response.push(deployer_1.default.formatChild(newChild));
                             return [3 /*break*/, 3];
                         case 2:
                             err_1 = _a.sent();

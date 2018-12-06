@@ -34,13 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var server_1 = __importDefault(require("../server"));
+var server_1 = require("../server");
 var update = express_1.Router();
 update.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var query, result, response, errors;
@@ -49,7 +46,7 @@ update.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
         if (process.env.NODE_ENV == "dev")
             console.log(req.body);
         query = req.body.query;
-        result = server_1.default.app.getChildrenFromJSON(query);
+        result = server_1.deployer.getChildrenFromJSON(query);
         response = [];
         errors = [];
         if (result.length > 0) {
@@ -61,7 +58,7 @@ update.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                             _a.trys.push([0, 2, , 3]);
                             newChild = child;
                             newChild.messages = [];
-                            return [4 /*yield*/, server_1.default.app.retrieve(newChild)];
+                            return [4 /*yield*/, server_1.deployer.retrieve(newChild)];
                         case 1:
                             _a.sent();
                             return [3 /*break*/, 3];
@@ -71,7 +68,7 @@ update.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                             return [3 /*break*/, 3];
                         case 3:
                             _a.trys.push([3, 5, , 6]);
-                            return [4 /*yield*/, server_1.default.app.install(child)];
+                            return [4 /*yield*/, server_1.deployer.install(child)];
                         case 4:
                             newChild = _a.sent();
                             response.push(newChild);

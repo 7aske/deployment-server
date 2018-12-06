@@ -50,8 +50,8 @@ var express_1 = require("express");
 var os_1 = require("os");
 var id = __importStar(require("shortid"));
 var url_1 = require("url");
-var app_1 = __importDefault(require("../app"));
-var server_1 = __importDefault(require("../server"));
+var deployer_1 = __importDefault(require("../deployer"));
+var server_1 = require("../server");
 var deploy = express_1.Router();
 deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var url, check, err, child, error_1, error_2, error_3;
@@ -67,10 +67,10 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                     url = err.input;
                 }
                 if (!(url.hostname == "github.com")) return [3 /*break*/, 15];
-                check = server_1.default.app.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
+                check = server_1.deployer.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
                 err = null;
                 child = {
-                    dir: server_1.default.app.repoDir + "/" + url.toString().match(/.*\/(.*)$/)[1],
+                    dir: server_1.deployer.repoDir + "/" + url.toString().match(/.*\/(.*)$/)[1],
                     errors: [],
                     id: id.generate(),
                     messages: [],
@@ -97,7 +97,7 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                 return [3 /*break*/, 14];
             case 2:
                 _a.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, server_1.default.app.retrieve(child)];
+                return [4 /*yield*/, server_1.deployer.retrieve(child)];
             case 3:
                 child = _a.sent();
                 return [3 /*break*/, 5];
@@ -108,7 +108,7 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
             case 5:
                 _a.trys.push([5, 8, , 9]);
                 if (!!err) return [3 /*break*/, 7];
-                return [4 /*yield*/, server_1.default.app.install(child)];
+                return [4 /*yield*/, server_1.deployer.install(child)];
             case 6:
                 child = _a.sent();
                 _a.label = 7;
@@ -120,7 +120,7 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
             case 9:
                 _a.trys.push([9, 12, , 13]);
                 if (!!err) return [3 /*break*/, 11];
-                return [4 /*yield*/, server_1.default.app.run(child)];
+                return [4 /*yield*/, server_1.deployer.run(child)];
             case 10:
                 child = _a.sent();
                 _a.label = 11;
@@ -131,10 +131,10 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                 return [3 /*break*/, 13];
             case 13:
                 if (!err) {
-                    res.send(app_1.default.formatChild(child));
+                    res.send(deployer_1.default.formatChild(child));
                 }
                 else {
-                    res.send(app_1.default.formatChild(err));
+                    res.send(deployer_1.default.formatChild(err));
                 }
                 _a.label = 14;
             case 14: return [3 /*break*/, 16];

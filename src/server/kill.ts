@@ -1,19 +1,19 @@
 import { Request, Response, Router } from "express";
-import { ChildServer } from "../app";
-import server from "../server";
+import { ChildServer } from "../deployer";
+import { deployer } from "../server";
 
 const kill = Router();
 
 kill.post("/", async (req: Request, res: Response) => {
 	if (process.env.NODE_ENV == "dev") console.log(req.body);
 	const query: number | string | null = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query, 10);
-	const children: ChildServer[] | ChildServer | null = server.app.getRunningChildren(query);
+	const children: ChildServer[] | ChildServer | null = deployer.getRunningChildren(query);
 	if (children instanceof Array) {
 		const response: ChildServer[] = [];
 		const errors: ChildServer[] = [];
 		children.forEach(async (child, i) => {
 			try {
-				const killed = await server.app.killChild(child);
+				const killed = await deployer.killChild(child);
 				if (killed) response.push(killed);
 			} catch (error) {
 				errors.push(error);
@@ -25,7 +25,7 @@ kill.post("/", async (req: Request, res: Response) => {
 		});
 	} else if (children) {
 		try {
-			const killed = await server.app.killChild(children);
+			const killed = await deployer.killChild(children);
 			if (killed) res.send([killed]);
 		} catch (error) {
 			res.send([error]);

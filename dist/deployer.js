@@ -49,8 +49,8 @@ var child_process_1 = require("child_process");
 var fs_1 = require("fs");
 var os_1 = require("os");
 var path_1 = require("path");
-var App = /** @class */ (function () {
-    function App(PORT, P) {
+var Deployer = /** @class */ (function () {
+    function Deployer(PORT, P) {
         this.PATHS = P;
         this.children = [];
         this.repoDir = "deployment";
@@ -60,7 +60,7 @@ var App = /** @class */ (function () {
         this.HTMLRegExp = new RegExp(/\.(html)$/i);
         this.init();
     }
-    App.prototype.init = function () {
+    Deployer.prototype.init = function () {
         if (!fs_1.existsSync(this.repoDir)) {
             fs_1.mkdirSync(this.repoDir);
             fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify({
@@ -72,7 +72,7 @@ var App = /** @class */ (function () {
             this.sortChildrenJSON();
         }
     };
-    App.prototype.retrieve = function (child) {
+    Deployer.prototype.retrieve = function (child) {
         var _this = this;
         // let ChildrenJSON: any = JSON.parse(readFileSync(this.ChildrenJSON, 'utf8'));
         return new Promise(function (resolve, reject) {
@@ -103,12 +103,12 @@ var App = /** @class */ (function () {
                     resolve(child);
                 }
                 else {
-                    reject(App.formatChildErrors(child));
+                    reject(Deployer.formatChildErrors(child));
                 }
             });
         });
     };
-    App.prototype.install = function (child) {
+    Deployer.prototype.install = function (child) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             // npm doesnt seem to work with spawn
@@ -138,22 +138,22 @@ var App = /** @class */ (function () {
                             resolve(child);
                         }
                         else {
-                            reject(App.formatChildErrors(child));
+                            reject(Deployer.formatChildErrors(child));
                         }
                     });
                 }
                 else {
                     child.messages.push("NPM found no dependencies.");
-                    resolve(App.formatChildErrors(child));
+                    resolve(Deployer.formatChildErrors(child));
                 }
             }
             else {
                 child.errors.push("Invalid package.json file");
-                reject(App.formatChildErrors(child));
+                reject(Deployer.formatChildErrors(child));
             }
         });
     };
-    App.prototype.run = function (child) {
+    Deployer.prototype.run = function (child) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var childPackageJSON, main, port, serverCode, node;
@@ -167,7 +167,7 @@ var App = /** @class */ (function () {
                         port = this.getPort(child);
                         if (!this.serverRunning(child.id)) return [3 /*break*/, 1];
                         child.errors.push("Server with that ID/Name is already running");
-                        reject(App.formatChildErrors(child));
+                        reject(Deployer.formatChildErrors(child));
                         return [3 /*break*/, 3];
                     case 1:
                         // if entry point is an html file open a basic static server
@@ -201,25 +201,25 @@ var App = /** @class */ (function () {
                         }
                         else {
                             child.errors.push("There is something wrong.");
-                            reject(App.formatChildErrors(child));
+                            reject(Deployer.formatChildErrors(child));
                         }
                         _a.label = 3;
                     case 3: return [3 /*break*/, 5];
                     case 4:
                         child.errors.push("Invalid package.json entry point.");
-                        reject(App.formatChildErrors(child));
+                        reject(Deployer.formatChildErrors(child));
                         _a.label = 5;
                     case 5: return [3 /*break*/, 7];
                     case 6:
                         child.errors.push("Invalid package.json file");
-                        reject(App.formatChildErrors(child));
+                        reject(Deployer.formatChildErrors(child));
                         _a.label = 7;
                     case 7: return [2 /*return*/];
                 }
             });
         }); });
     };
-    App.prototype.runTest = function (child, port, main) {
+    Deployer.prototype.runTest = function (child, port, main) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             // preform a test
@@ -247,14 +247,14 @@ var App = /** @class */ (function () {
             });
         });
     };
-    App.prototype.remove = function (child) {
+    Deployer.prototype.remove = function (child) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             if (child) {
                 if (_this.serverRunning(child.id)) {
                     // @ts-ignore
                     var runningChild = _this.getRunningChildren(child.id);
-                    runningChild ? _this.killChild(runningChild) : reject(App.formatChildErrors(child));
+                    runningChild ? _this.killChild(runningChild) : reject(Deployer.formatChildErrors(child));
                 }
                 var error_1 = false;
                 var rm = void 0;
@@ -287,7 +287,7 @@ var App = /** @class */ (function () {
                 });
                 rm.on("close", function () {
                     if (error_1)
-                        reject(App.formatChildErrors(child));
+                        reject(Deployer.formatChildErrors(child));
                     else {
                         _this.updateChildrenJSON();
                         resolve(child);
@@ -301,7 +301,7 @@ var App = /** @class */ (function () {
             }
         });
     };
-    App.prototype.clear = function (query) {
+    Deployer.prototype.clear = function (query) {
         var childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         if (typeof query == "string") {
             childrenJSON.children.forEach(function (child) {
@@ -330,7 +330,7 @@ var App = /** @class */ (function () {
         fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), "utf8");
         return true;
     };
-    App.prototype.browse = function (query) {
+    Deployer.prototype.browse = function (query) {
         var childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         var result = [];
         if (typeof query == "string") {
@@ -348,7 +348,7 @@ var App = /** @class */ (function () {
             return childrenJSON.children;
         }
     };
-    App.prototype.getPort = function (child) {
+    Deployer.prototype.getPort = function (child) {
         var e_1, _a;
         // if child doesnt have predefined port
         // find first available port by searching through children.json children array
@@ -378,11 +378,11 @@ var App = /** @class */ (function () {
             return this.childPort;
         }
     };
-    App.prototype.serverRunning = function (query) {
+    Deployer.prototype.serverRunning = function (query) {
         var child = this.children.find(function (c) { return c.id == query || c.name == query || c.pid == query; });
         return !!child;
     };
-    App.prototype.setChildToJSON = function (newChild) {
+    Deployer.prototype.setChildToJSON = function (newChild) {
         var childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         var child = childrenJSON.children.find(function (c) {
             return c.id == newChild.id;
@@ -397,7 +397,7 @@ var App = /** @class */ (function () {
         }
         fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), "utf8");
     };
-    App.prototype.getChildrenFromJSON = function (query) {
+    Deployer.prototype.getChildrenFromJSON = function (query) {
         // get the information about a repo from repos folder using childs.json
         var childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         var result = [];
@@ -414,7 +414,7 @@ var App = /** @class */ (function () {
         }
         return result;
     };
-    App.prototype.updateChildrenJSON = function () {
+    Deployer.prototype.updateChildrenJSON = function () {
         // update children.json
         var result = [];
         var repos = fs_1.readdirSync(this.repoDir, "utf8");
@@ -426,7 +426,7 @@ var App = /** @class */ (function () {
         this.childPort = 3001;
         fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify({ children: result }), "utf8");
     };
-    App.prototype.sortChildrenJSON = function () {
+    Deployer.prototype.sortChildrenJSON = function () {
         var childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         if (childrenJSON.children.length > 1) {
             childrenJSON.children.sort(function (a, b) {
@@ -443,7 +443,7 @@ var App = /** @class */ (function () {
             fs_1.writeFileSync(path_1.join(process.cwd(), this.childrenJSON), JSON.stringify(childrenJSON), "utf8");
         }
     };
-    App.prototype.getRunningChildren = function (query) {
+    Deployer.prototype.getRunningChildren = function (query) {
         if (typeof query == "string") {
             var child = this.children.find(function (c) { return c.id == query || c.name == query; });
             return child ? child : null;
@@ -454,21 +454,21 @@ var App = /** @class */ (function () {
         }
         return this.children;
     };
-    App.prototype.killChild = function (child) {
+    Deployer.prototype.killChild = function (child) {
         var _this = this;
         // kill running instance process by PID | Name | ID
         return new Promise(function (resolve, reject) {
             child.process.kill();
             if (child.process.killed) {
                 _this.children.splice(_this.children.indexOf(child), 1);
-                resolve(App.formatChild(child));
+                resolve(Deployer.formatChild(child));
             }
             else {
-                reject(App.formatChild(child));
+                reject(Deployer.formatChild(child));
             }
         });
     };
-    App.prototype.formatStdOut = function (stdout, child) {
+    Deployer.prototype.formatStdOut = function (stdout, child) {
         // format stdout to differentiate between errors and messages
         var data = stdout.toString();
         if (data.indexOf("fatal") != -1 ||
@@ -482,7 +482,7 @@ var App = /** @class */ (function () {
         }
         return child;
     };
-    App.formatChild = function (child) {
+    Deployer.formatChild = function (child) {
         // format server output to avoid JSON parse circular JSON exceptions
         return {
             action: child.action,
@@ -501,7 +501,7 @@ var App = /** @class */ (function () {
             repo: child.repo,
         };
     };
-    App.formatChildErrors = function (child) {
+    Deployer.formatChildErrors = function (child) {
         // format server output to avoid JSON parse circular JSON exceptions
         return {
             dir: child.dir,
@@ -513,6 +513,6 @@ var App = /** @class */ (function () {
             repo: child.repo,
         };
     };
-    return App;
+    return Deployer;
 }());
-exports.default = App;
+exports.default = Deployer;

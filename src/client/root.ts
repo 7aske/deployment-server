@@ -1,10 +1,11 @@
 import { Request, Response, Router } from "express";
-import server from "../server";
+import { deployer } from "../server";
+
 const root = Router();
 
 root.get("/", (req: Request, res: Response) => {
-	const deployed = server.app.getChildrenFromJSON(null);
-	const running = server.app.getRunningChildren(null);
+	const deployed = deployer.getChildrenFromJSON(null);
+	const running = deployer.getRunningChildren(null);
 	res.json({deployed, running});
 });
 

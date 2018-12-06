@@ -2,8 +2,8 @@ import { Request, Response, Router } from "express";
 import { platform } from "os";
 import * as id from "shortid";
 import { URL } from "url";
-import App, {ChildServer} from "../app";
-import server from "../server";
+import Deployer, { ChildServer } from "../deployer";
+import { deployer } from "../server";
 
 const deploy = Router();
 
@@ -16,10 +16,10 @@ deploy.post("/", async (req: Request, res: Response) => {
 		url = err.input;
 	}
 	if (url.hostname == "github.com") {
-		const check: ChildServer[] = server.app.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
+		const check: ChildServer[] = deployer.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
 		let err: ChildServer | null = null;
 		let child: ChildServer = {
-			dir: `${server.app.repoDir}/${url.toString().match(/.*\/(.*)$/)![1]}`,
+			dir: `${deployer.repoDir}/${url.toString().match(/.*\/(.*)$/)![1]}`,
 			errors: [],
 			id: id.generate(),
 			messages: [],
@@ -43,30 +43,30 @@ deploy.post("/", async (req: Request, res: Response) => {
 			});
 		} else {
 			try {
-				child = await server.app.retrieve(child);
+				child = await deployer.retrieve(child);
 				// if (process.env.NODE_ENV == 'dev') console.info(child);
 			} catch (error) {
 				err = error;
 				// if (process.env.NODE_ENV == 'dev') console.error(child);
 			}
 			try {
-				if (!err) child = await server.app.install(child);
+				if (!err) child = await deployer.install(child);
 				// if (process.env.NODE_ENV == 'dev')console.info(child);
 			} catch (error) {
 				err = error;
 				// if (process.env.NODE_ENV == 'dev') console.error(child);
 			}
 			try {
-				if (!err) child = await server.app.run(child);
+				if (!err) child = await deployer.run(child);
 				// if (process.env.NODE_ENV == 'dev')console.info(child);
 			} catch (error) {
 				err = error;
 				// if (process.env.NODE_ENV == 'dev') console.error(child);
 			}
 			if (!err) {
-				res.send(App.formatChild(child));
+				res.send(Deployer.formatChild(child));
 			} else {
-				res.send(App.formatChild(err));
+				res.send(Deployer.formatChild(err));
 			}
 		}
 	} else {

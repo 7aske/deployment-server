@@ -1,6 +1,6 @@
 import {Request, Response, Router } from "express";
-import App, { ChildServer } from "../app";
-import server from "../server";
+import Deployer, { ChildServer } from "../deployer";
+import { deployer } from "../server";
 
 const run = Router();
 run.post("/", async (req: Request, res: Response) => {
@@ -8,12 +8,12 @@ run.post("/", async (req: Request, res: Response) => {
 	const query: string | null = isNaN(req.body.query) ? req.body.query : parseInt(req.body.query, 10);
 	const response: ChildServer[] = [];
 	const errors: ChildServer[] = [];
-	const result: ChildServer[] = server.app.getChildrenFromJSON(query);
+	const result: ChildServer[] = deployer.getChildrenFromJSON(query);
 	if (result.length > 0) {
 		result.forEach(async (child, i, array) => {
 			try {
-				const newChild = await server.app.run(child);
-				response.push(App.formatChild(newChild));
+				const newChild = await deployer.run(child);
+				response.push(Deployer.formatChild(newChild));
 			} catch (err) {
 				errors.push(err);
 			}

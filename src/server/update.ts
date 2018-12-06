@@ -1,13 +1,13 @@
-import { Request, Response,  Router } from "express";
-import { ChildServer } from "../app";
-import server from "../server";
+import { Request, Response, Router } from "express";
+import { ChildServer } from "../deployer";
+import { deployer } from "../server";
 
 const update = Router();
 
 update.post("/", async (req: Request, res: Response) => {
 	if (process.env.NODE_ENV == "dev") console.log(req.body);
 	const query: string | null = req.body.query;
-	const result: ChildServer[] = server.app.getChildrenFromJSON(query);
+	const result: ChildServer[] = deployer.getChildrenFromJSON(query);
 	const response: ChildServer[] = [];
 	const errors: ChildServer[] = [];
 	if (result.length > 0) {
@@ -15,12 +15,12 @@ update.post("/", async (req: Request, res: Response) => {
 			try {
 				const newChild = child;
 				newChild.messages = [];
-				await server.app.retrieve(newChild);
+				await deployer.retrieve(newChild);
 			} catch (err) {
 				errors.push(err);
 			}
 			try {
-				const newChild = await server.app.install(child);
+				const newChild = await deployer.install(child);
 				response.push(newChild);
 			} catch (err) {
 				errors.push(err);

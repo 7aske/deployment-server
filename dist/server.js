@@ -14,24 +14,17 @@ var bodyParser = __importStar(require("body-parser"));
 var express_1 = __importDefault(require("express"));
 var fs_1 = require("fs");
 var path_1 = require("path");
-var app_1 = __importDefault(require("./app"));
+var deployer_1 = __importDefault(require("./deployer"));
 var router_1 = __importDefault(require("./router"));
 var PATHSConfig = path_1.join(__dirname, "config/PATHS.json");
 var PATHS = JSON.parse(fs_1.readFileSync(PATHSConfig, "utf8"));
-var Server = /** @class */ (function () {
-    function Server() {
-        var _this = this;
-        this.PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-        this.app = new app_1.default(this.PORT, PATHS);
-        this.server = express_1.default();
-        this.server.use(bodyParser.json());
-        this.server.use(bodyParser.urlencoded({ extended: true }));
-        this.server.use("/", router_1.default);
-        this.server.listen(this.PORT, function () {
-            return console.log(_this.PORT);
-        });
-    }
-    return Server;
-}());
-var server = new Server();
+var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+exports.deployer = new deployer_1.default(PORT, PATHS);
+var server = express_1.default();
+server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({ extended: true }));
+server.use("/", router_1.default);
+server.listen(PORT, function () {
+    return console.log(PORT);
+});
 exports.default = server;

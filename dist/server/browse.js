@@ -34,13 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var server_1 = __importDefault(require("../server"));
+var server_1 = require("../server");
 var browse = express_1.Router();
 browse.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var query, response;
@@ -48,7 +45,7 @@ browse.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
         if (process.env.NODE_ENV == "dev")
             console.log(req.body);
         query = req.body.query;
-        response = server_1.default.app.browse(query);
+        response = server_1.deployer.browse(query);
         res.send(response);
         return [2 /*return*/];
     });
