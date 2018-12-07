@@ -1,6 +1,7 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import morgan from "morgan";
-import root from "./client/root";
+import { join } from "path";
+import client from "./client/client";
 import browse from "./server/browse";
 import clear from "./server/clear";
 import deploy from "./server/deploy";
@@ -17,6 +18,7 @@ router.use(
 		":method :url HTTP/:http-version :status :res[content-length] - :response-time m"
 	)
 );
+
 router.use("/deploy", deploy);
 router.use("/find", find);
 router.use("/kill", kill);
@@ -25,6 +27,13 @@ router.use("/update", update);
 router.use("/remove", remove);
 router.use("/clear", clear);
 router.use("/browse", browse);
-router.use("/", root);
+
+router.use("/scripts", express.static(join(process.cwd(), "dist/client/scripts")));
+router.use("/stylesheets", express.static(join(process.cwd(), "dist/client/stylesheets")));
+router.use("/fonts", express.static(join(process.cwd(), "dist/client/fonts")));
+router.use("/node_modules/bootstrap", express.static(join(process.cwd(), "node_modules/bootstrap")));
+router.use("/node_modules/popper.js", express.static(join(process.cwd(), "node_modules/popper.js")));
+router.use("/node_modules/jquery", express.static(join(process.cwd(), "node_modules/jquery")));
+router.use("/", client);
 
 export default router;

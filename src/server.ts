@@ -43,6 +43,7 @@ writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 export const deployer = new Deployer(PORT, PATHS);
 const server = express();
+
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use("/", router);

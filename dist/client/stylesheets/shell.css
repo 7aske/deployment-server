@@ -1,0 +1,53 @@
+.shell-wrap {
+	width: 500px;
+	/* box-shadow: 0 0 30px rgba(0, 0, 0, 0.4); */
+	height: 300px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.shell-top-bar {
+	text-align: center;
+	color: #ffffff;
+	padding: 5px 0;
+	margin: 0;
+	text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+	font-size: 0.85em;
+	border: 1px solid #002138;
+	border-bottom: none;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	background: #00406d;
+}
+
+.shell-body {
+	margin: 0;
+	padding: 5px;
+	list-style: none;
+	height: 100%;
+	background: #141414;
+	color: white;
+	font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+	line-height: 1.6em;
+	word-wrap: break-word;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+.shell-body li:before {
+	content: '$';
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.shell-body li {
+	word-wrap: break-word;
+	position: relative;
+	text-align: left;
+	padding: 0 0 0 15px;
+}
+#deploymentServerTerminal {
+	transform: translateY(300px);
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../stylesheets/icons.css">
+    <link rel="stylesheet" href="../stylesheets/shell.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/loader.css">
+    <title>Development Client</title>
+</head>
+
+<body>
+    <header>
+        <div class="d-flex">
+            <div id="tab0" class="tab active" onclick="handleTabClick(event)">
+                Running
+            </div>
+            <div id="tab1" class="tab" onclick="handleTabClick(event)">
+                Deployed
+            </div>
+        </div>
+        <div class="d-flex justify-content-end">
+            <input id="searchInp" onfocus="this.className='focused'" onblur="this.className=''" placeholder="Search" type="text"><button
+                class="btn btn-secondary" id="searchBtn"><i class="material-icons">search</i></button>
+        </div>
+    </header>
+    <aside>
+        <button class="btn btn-dark" id="deployBtn">Deploy</button>
+        <button class="btn btn-dark" id="updateBtn">Update</button>
+        <button class="btn btn-dark" id="runBtn">Run</button>
+        <button class="btn btn-dark" id="killBtn">Kill</button>
+        <button class="btn btn-dark" id="removeBtn">Remove</button>
+        <button class="btn btn-dark" id="findBtn">Find</button>
+        <button class="btn btn-dark" id="browseBtn">Browse</button>
+        <button class="btn btn-success" id="refreshBtn">Refresh</button>
+
+    </aside>
+    <div class="loader hide">
+
+    </div>
+    <main>
+
+        <div class="accordion" id="runningContainer">
+
+        </div>
+        <div class="accordion hide" id="deployedContainer">
+
+        </div>
+    </main>
+    <div id="footerTrigger">
+        <i class="material-icons">arrow_upward</i>Terminal
+    </div>
+    <footer>
+        <div class="row w-100 p-3">
+            <div class="col-md-6 col-sm-12 d-flex justify-content-around action-input">
+                <input type="text" id="goInp" placeholder="Query">
+                <button class="btn btn-success" id="goBtn"><i class="material-icons">arrow_forward</i></button>
+            </div>
+            <div class="col-md-6 col-sm-12 d-flex justify-content-around server-input">
+                <input type="text" id="serverInp" placeholder="hostname">
+                <input type="number" id="portInp" placeholder="PORT">
+            </div>
+        </div>
+    </footer>
+    <script>let exports = {};</script>
+    <script src="../../../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../../../node_modules/popper.js/dist/umd/popper.min.js"></script>
+    <script src="../../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../scripts/helpers.js"></script>
+    <script src="../scripts/templates.js"></script>
+    <script src="../scripts/renderer.js"></script>
+</body>
+
+</html>

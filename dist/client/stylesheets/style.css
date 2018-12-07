@@ -1,0 +1,250 @@
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto-Regular.ttf");
+}
+* {
+  transition: all 200ms;
+}
+
+* {
+  font-family: "Roboto";
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  background-color: #222222;
+  height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px #666666;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #0061a7;
+  -webkit-box-shadow: inset 0 0 6px #406ce4;
+}
+
+header {
+  height: 35px;
+  position: relative;
+  padding-left: 90px;
+  background-color: #111111;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+header input {
+  background-color: #444444;
+  border: 1px solid black;
+  margin-top: 1px;
+  border-radius: 4px;
+  color: white;
+  height: 29px;
+  padding-left: 5px;
+}
+header button {
+  margin: 2px 5px;
+  height: 26px;
+  background-color: #444444 !important;
+  border-color: #444444;
+}
+header button i {
+  margin-top: -4px;
+}
+header .tab {
+  text-align: center;
+  height: 100%;
+  line-height: 30px;
+  width: 200px;
+  color: white;
+  background-color: #444444;
+  transition: all 0ms;
+}
+header .tab:hover {
+  background-color: #406ce4;
+  cursor: pointer;
+}
+header .tab:hover:before {
+  background: linear-gradient(125deg, #111111 50%, #406ce4 50%);
+}
+header .tab:hover:after {
+  background: linear-gradient(-125deg, #111111 50%, #406ce4 50%);
+}
+header .tab::before {
+  content: " ";
+  float: left;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(125deg, #111111 50%, #444444 50%);
+}
+header .tab::after {
+  content: " ";
+  float: right;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(-125deg, #111111 50%, #444444 50%);
+}
+header .active {
+  color: white;
+  background-color: #00406d;
+}
+header .active::before {
+  background: linear-gradient(125deg, #111111 50%, #00406d 50%);
+}
+header .active::after {
+  background: linear-gradient(-125deg, #111111 50%, #00406d 50%);
+}
+
+aside {
+  box-sizing: border-box;
+  padding: 30px 5px 5px 5px;
+  height: 100vh;
+  width: 90px;
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  background-color: #111111;
+  color: white;
+}
+aside .btn {
+  margin-bottom: 5px;
+  width: 80px;
+}
+aside .active {
+  background-color: #f5ac0e !important;
+  color: #111111 !important;
+}
+
+#footerTrigger {
+  height: 30px;
+  background-color: #111111;
+  color: #ffffff66;
+  padding-left: 90px;
+  line-height: 30px;
+  font-size: 24px;
+}
+
+footer {
+  position: absolute;
+  top: 100vh;
+  box-sizing: border-box;
+  z-index: 11;
+  text-align: right;
+  width: 100vw;
+  bottom: 0;
+  height: 16vh;
+  padding: 0 7px 7px 90px;
+  background-color: #111111;
+}
+footer div .action-input input {
+  width: 70%;
+}
+footer div .action-input button {
+  width: 30%;
+}
+footer div .server-input input[type=text] {
+  width: 70%;
+}
+footer div .server-input input[type=number] {
+  width: 30%;
+}
+footer div input {
+  background-color: #444444;
+  border: 1px solid black;
+  border-radius: 4px;
+  color: white;
+  height: 46px;
+  padding-left: 5px;
+}
+
+main {
+  margin-left: 90px;
+  color: white;
+  height: 100vh;
+  overflow-y: scroll;
+}
+main .card .btn {
+  margin-right: 5px;
+}
+main .list-group-item {
+  text-align: center;
+}
+main .list-group-item-action {
+  border-radius: 5px !important;
+}
+main .list-group-item-action:hover {
+  cursor: pointer;
+  color: #111111 !important;
+  background-color: #28a745 !important;
+}
+main .material-icons {
+  pointer-events: none !important;
+  padding-top: 7px;
+  margin-bottom: -5px;
+}
+
+.hide {
+  display: none;
+}
+
+.bg-blue {
+  background-color: #00406d;
+}
+
+/* Tooltip container */
+.btn {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.btn .tooltiptext {
+  visibility: hidden;
+  width: 80px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 100;
+  bottom: -75%;
+  left: 50%;
+  margin-left: -40px;
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.btn:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.clickthrough {
+  pointer-events: none !important;
+}
+
+/*# sourceMappingURL=style.css.map */

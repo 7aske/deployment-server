@@ -1,11 +1,19 @@
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = require("express");
+var express_1 = __importStar(require("express"));
 var morgan_1 = __importDefault(require("morgan"));
-var root_1 = __importDefault(require("./client/root"));
+var path_1 = require("path");
+var client_1 = __importDefault(require("./client/client"));
 var browse_1 = __importDefault(require("./server/browse"));
 var clear_1 = __importDefault(require("./server/clear"));
 var deploy_1 = __importDefault(require("./server/deploy"));
@@ -24,5 +32,11 @@ router.use("/update", update_1.default);
 router.use("/remove", remove_1.default);
 router.use("/clear", clear_1.default);
 router.use("/browse", browse_1.default);
-router.use("/", root_1.default);
+router.use("/scripts", express_1.default.static(path_1.join(process.cwd(), "dist/client/scripts")));
+router.use("/stylesheets", express_1.default.static(path_1.join(process.cwd(), "dist/client/stylesheets")));
+router.use("/fonts", express_1.default.static(path_1.join(process.cwd(), "dist/client/fonts")));
+router.use("/node_modules/bootstrap", express_1.default.static(path_1.join(process.cwd(), "node_modules/bootstrap")));
+router.use("/node_modules/popper.js", express_1.default.static(path_1.join(process.cwd(), "node_modules/popper.js")));
+router.use("/node_modules/jquery", express_1.default.static(path_1.join(process.cwd(), "node_modules/jquery")));
+router.use("/", client_1.default);
 exports.default = router;

@@ -15,6 +15,7 @@ deploy.post("/", async (req: Request, res: Response) => {
 	} catch (err) {
 		url = err.input;
 	}
+	console.log(req.body);
 	if (url.hostname == "github.com") {
 		const check: ChildServer[] = deployer.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
 		let err: ChildServer | null = null;
