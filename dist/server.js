@@ -14,6 +14,8 @@ var bodyParser = __importStar(require("body-parser"));
 var child_process_1 = require("child_process");
 var express_1 = __importDefault(require("express"));
 var fs_1 = require("fs");
+var http_1 = __importDefault(require("http"));
+var https_1 = __importDefault(require("https"));
 var path_1 = require("path");
 var deployer_1 = __importDefault(require("./deployer"));
 var router_1 = __importDefault(require("./router"));
@@ -48,11 +50,27 @@ else {
 if (process.platform == "linux" && !fs_1.existsSync("/usr/bin/node"))
     child_process_1.execSync("sudo ln -s " + PATHS.node + " /usr/bin/node");
 fs_1.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
-var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 exports.deployer = new deployer_1.default(PORT, PATHS);
 var server = express_1.default();
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
+server.use("/", function (req, res) {
+    console.log(req.url);
+    res.status(301).redirect("https://" + req.headers.host + req.url);
+});
 server.use("/", router_1.default);
-server.listen(PORT, function () { return console.log(PORT); });
+var cert = fs_1.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
+var key = fs_1.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/privkey1.pem"));
+var ca = fs_1.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/chain1.pem"));
+var cred = {
+    ca: ca,
+    cert: cert,
+    key: key
+};
+var httpServer = http_1.default.createServer(server);
+var httpsServer = https_1.default.createServer(cred, server);
+httpServer.listen(80, function () { return console.log(0); });
+httpsServer.listen(443, function () { return console.log(0); });
+// server.listen(PORT, () => console.log(PORT));
 exports.default = server;

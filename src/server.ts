@@ -2,6 +2,8 @@ import * as bodyParser from "body-parser";
 import { execSync } from "child_process";
 import express, { Application } from "express";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import http from "http";
+import https from "https";
 import { join } from "path";
 import Deployer from "./deployer";
 import router from "./router";
@@ -10,6 +12,7 @@ interface PATHS {
 	node: string;
 	npm: string;
 }
+
 const PATHSConfigFolder = join(process.cwd(), "config");
 const PATHSConfigFile = join(PATHSConfigFolder, "PATHS.json");
 let PATHS: PATHS = {
@@ -40,13 +43,31 @@ if (!existsSync(PATHSConfigFolder)) {
 if (process.platform == "linux" && !existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
 writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 export const deployer = new Deployer(PORT, PATHS);
 const server = express();
 
 server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
+server.use(bodyParser.urlencoded({extended: true}));
+server.use("/", (req: express.Request, res: express.Response) => {
+	console.log(req.url);
+	res.status(301).redirect("https://" + req.headers.host + req.url);
+});
 server.use("/", router);
-server.listen(PORT, () => console.log(PORT));
+
+const cert = readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
+const key = readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/privkey1.pem"));
+const ca = readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/chain1.pem"));
+
+const cred = {
+	ca,
+	cert,
+	key
+};
+const httpServer = http.createServer(server);
+const httpsServer = https.createServer(cred, server);
+httpServer.listen(80, () => console.log(0));
+httpsServer.listen(443, () => console.log(0));
+// server.listen(PORT, () => console.log(PORT));
 
 export default server;
