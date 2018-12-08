@@ -57,8 +57,8 @@ server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({extended: true}));
 server.use("/", (req: express.Request, res: express.Response) => {
 	// noinspection TypeScriptValidateJSTypes
-	console.log(req.url);
-	res.status(301).redirect("https://" + req.headers.host + req.url);
+	if (req.protocol == "http:")
+		res.redirect("https://" + req.headers.host + req.url);
 });
 server.use("/", router);
 

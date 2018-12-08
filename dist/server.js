@@ -59,8 +59,8 @@ server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use("/", function (req, res) {
     // noinspection TypeScriptValidateJSTypes
-    console.log(req.url);
-    res.status(301).redirect("https://" + req.headers.host + req.url);
+    if (req.protocol == "http:")
+        res.redirect("https://" + req.headers.host + req.url);
 });
 server.use("/", router_1.default);
 var cert = fs_1.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
