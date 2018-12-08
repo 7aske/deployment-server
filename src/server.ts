@@ -1,7 +1,7 @@
 import * as bodyParser from "body-parser";
 import { execSync } from "child_process";
-import express, { Application } from "express";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import express from "express";
+import fs from "fs";
 import http from "http";
 import https from "https";
 import morgan from "morgan";
@@ -14,6 +14,24 @@ interface PATHS {
 	npm: string;
 }
 
+const rmrf = (path: string) => {
+	if (fs.existsSync(path)) {
+		if (fs.lstatSync(path).isDirectory()) {
+			fs.readdirSync(path).forEach((file: string, index: number) => {
+				const curPath = path + "/" + file;
+				if (fs.lstatSync(curPath).isDirectory()) { // recurse
+					rmrf(curPath);
+				} else { // delete file
+					fs.unlinkSync(curPath);
+				}
+			});
+			fs.rmdirSync(path);
+		} else {
+			fs.unlinkSync(path);
+		}
+	}
+};
+
 const PATHSConfigFolder = join(process.cwd(), "config");
 const PATHSConfigFile = join(PATHSConfigFolder, "PATHS.json");
 let PATHS: PATHS = {
@@ -21,8 +39,8 @@ let PATHS: PATHS = {
 	npm: "npm"
 };
 
-if (!existsSync(PATHSConfigFolder)) {
-	mkdirSync(PATHSConfigFolder);
+if (!fs.existsSync(PATHSConfigFolder)) {
+	fs.mkdirSync(PATHSConfigFolder);
 	if (process.platform == "linux") {
 		PATHS.node = execSync("which node")
 			.toString()
@@ -39,10 +57,10 @@ if (!existsSync(PATHSConfigFolder)) {
 			.split("\r\n")[1];
 	}
 } else {
-	PATHS = JSON.parse(readFileSync(PATHSConfigFile, "utf8"));
+	PATHS = JSON.parse(fs.readFileSync(PATHSConfigFile, "utf8"));
 }
-if (process.platform == "linux" && !existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
-writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
+if (process.platform == "linux" && !fs.existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
+fs.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 export const deployer = new Deployer(PORT, PATHS);
@@ -55,28 +73,41 @@ server.use(
 );
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({extended: true}));
-server.use("/", (req: express.Request, res: express.Response, next: express.NextFunction) => {
-	// noinspection TypeScriptValidateJSTypes
-	console.log(req.protocol);
-	if (req.protocol == "http")
-		res.status(302).redirect("https://" + req.headers.host + req.url);
-	else next();
-});
+if (process.argv.indexOf("--ssl") != -1)
+	server.use("/", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+		// noinspection TypeScriptValidateJSTypes
+		console.log(req.protocol);
+		if (req.protocol == "http")
+			res.status(302).redirect("https://" + req.headers.host + req.url);
+		else next();
+	});
 server.use("/", router);
 
-const cert = readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
-const key = readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/privkey1.pem"));
-const ca = readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/chain1.pem"));
 
-const cred = {
-	ca,
-	cert,
-	key
-};
+if (process.argv.indexOf("--ssl") != -1) {
+	const cert = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
+	const key = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/privkey1.pem"));
+	const ca = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/chain1.pem"));
+
+	const cred = {
+		ca,
+		cert,
+		key
+	};
+	const httpsServer = https.createServer(cred, server);
+	httpsServer.listen(443, () => console.log(443));
+}
+
+if (process.argv.indexOf("--client") != -1) {
+	const clientFolder = join(process.cwd(), "dist/client");
+	const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+	rmrf(clientFolder);
+	const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
+	junkFiles.forEach(f => rmrf(join(clientFolder, f)));
+}
 const httpServer = http.createServer(server);
-const httpsServer = https.createServer(cred, server);
+
 httpServer.listen(PORT, () => console.log(PORT));
-httpsServer.listen(443, () => console.log(443));
 // server.listen(PORT, () => console.log(PORT));
 
 export default server;

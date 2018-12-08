@@ -2,3 +2,4 @@ node_modules
 deployment
 config
 .idea
+dist/client
