@@ -7,13 +7,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 var electron = null;
-Promise.resolve().then(function () { return __importStar(require("electron")); }).then(function (e) { return electron = e; }).catch(function (e) { return electron = undefined; });
+Promise.resolve().then(function () { return __importStar(require("electron")); }).then(function (e) { return electron = e; }).catch(function () { return electron = undefined; });
 function getUrl() {
     if (electron == undefined || electron == null) {
         var storage = JSON.parse(localStorage.getItem("config"));
-        if (!storage)
-            return { hostname: "localhost", port: 3000 };
-        return storage.url;
+        if (!storage) {
+            var url = { hostname: "7aske.servebeer.com", port: 80 };
+            localStorage.setItem("config", JSON.stringify({ url: url }));
+            return url;
+        }
+        else {
+            return storage.url;
+        }
     }
     else {
         var storage = electron.remote.getGlobal("config");

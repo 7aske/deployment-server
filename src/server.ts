@@ -4,6 +4,7 @@ import express, { Application } from "express";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import http from "http";
 import https from "https";
+import morgan from "morgan";
 import { join } from "path";
 import Deployer from "./deployer";
 import router from "./router";
@@ -47,9 +48,15 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 export const deployer = new Deployer(PORT, PATHS);
 const server = express();
 
+server.use(
+	morgan(
+		":method :url HTTP/:http-version :status :res[content-length] - :response-time m"
+	)
+);
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({extended: true}));
 server.use("/", (req: express.Request, res: express.Response) => {
+	// noinspection TypeScriptValidateJSTypes
 	console.log(req.url);
 	res.status(301).redirect("https://" + req.headers.host + req.url);
 });
@@ -66,8 +73,8 @@ const cred = {
 };
 const httpServer = http.createServer(server);
 const httpsServer = https.createServer(cred, server);
-httpServer.listen(80, () => console.log(0));
-httpsServer.listen(443, () => console.log(0));
+httpServer.listen(PORT, () => console.log(PORT));
+httpsServer.listen(443, () => console.log(443));
 // server.listen(PORT, () => console.log(PORT));
 
 export default server;

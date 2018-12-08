@@ -39,7 +39,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var serverUrl = getUrl();
 function formatUrl(hostname, port) {
-    return "http://" + hostname + ":" + port;
+    return window.location.protocol.match(/(https:)/) ? "https://" + hostname + ":" + port : "http://" + hostname + ":" + port;
 }
 var actions = {
     deployBtn: {
@@ -67,12 +67,14 @@ var currentTab = tabs.running;
 var currentAction = actions.findBtn;
 // find running instances on start
 document.addEventListener("DOMContentLoaded", function () {
+    // noinspection JSIgnoredPromiseFromCall
     execute({
         path: "find",
         data: {
             query: null
         }
     });
+    // noinspection JSIgnoredPromiseFromCall
     execute({
         path: "browse",
         data: {
@@ -82,12 +84,14 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 var refreshBtn = document.querySelector("#refreshBtn");
 refreshBtn.addEventListener("click", function () {
+    // noinspection JSIgnoredPromiseFromCall
     execute({
         path: "find",
         data: {
             query: null
         }
     });
+    // noinspection JSIgnoredPromiseFromCall
     execute({
         path: "browse",
         data: {
@@ -191,6 +195,7 @@ goBtn.addEventListener("click", function () {
             currentTab = tabs.deployed;
             changeTab();
         }
+        // noinspection JSIgnoredPromiseFromCall
         execute({
             path: currentAction.action,
             data: {
@@ -237,6 +242,7 @@ function footerDown() {
     });
     goInp.blur();
 }
+// noinspection JSUnusedGlobalSymbols
 function handleTabClick(event) {
     var target = event.target;
     if (target.id == "tab0")
@@ -265,7 +271,7 @@ function collapseToggle(event) {
         return false;
     var bar = target;
     var t = document.querySelector(target.attributes.getNamedItem("data-target").value);
-    var next = t.parentElement.nextElementSibling;
+    // const next = t.parentElement.nextElementSibling;
     if (bar.attributes.getNamedItem("aria-expanded").value == "true") {
         t.classList.remove("show");
         bar.attributes.getNamedItem("aria-expanded").value = "false";
@@ -286,6 +292,7 @@ function fromListExecute(event) {
     setTimeout(function () {
         footerUp();
     }, 100);
+    // noinspection JSIgnoredPromiseFromCall
     execute({
         path: actions[target.attributes.getNamedItem("data-action").value].action,
         data: {
@@ -324,12 +331,14 @@ function execute(payload) {
                         loader.classList.add("hide");
                     });
                     if (payload.path != "find" && payload.path != "browse") {
+                        // noinspection JSIgnoredPromiseFromCall
                         execute({
                             path: "find",
                             data: {
                                 query: null
                             }
                         });
+                        // noinspection JSIgnoredPromiseFromCall
                         execute({
                             path: "browse",
                             data: {

@@ -11,7 +11,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importStar(require("express"));
-var morgan_1 = __importDefault(require("morgan"));
 var path_1 = require("path");
 var client_1 = __importDefault(require("./client/client"));
 var browse_1 = __importDefault(require("./server/browse"));
@@ -23,7 +22,6 @@ var remove_1 = __importDefault(require("./server/remove"));
 var run_1 = __importDefault(require("./server/run"));
 var update_1 = __importDefault(require("./server/update"));
 var router = express_1.Router();
-router.use(morgan_1.default(":method :url HTTP/:http-version :status :res[content-length] - :response-time m"));
 router.use("/deploy", deploy_1.default);
 router.use("/find", find_1.default);
 router.use("/kill", kill_1.default);

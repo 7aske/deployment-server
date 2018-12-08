@@ -16,6 +16,7 @@ var express_1 = __importDefault(require("express"));
 var fs_1 = require("fs");
 var http_1 = __importDefault(require("http"));
 var https_1 = __importDefault(require("https"));
+var morgan_1 = __importDefault(require("morgan"));
 var path_1 = require("path");
 var deployer_1 = __importDefault(require("./deployer"));
 var router_1 = __importDefault(require("./router"));
@@ -53,9 +54,11 @@ fs_1.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 exports.deployer = new deployer_1.default(PORT, PATHS);
 var server = express_1.default();
+server.use(morgan_1.default(":method :url HTTP/:http-version :status :res[content-length] - :response-time m"));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use("/", function (req, res) {
+    // noinspection TypeScriptValidateJSTypes
     console.log(req.url);
     res.status(301).redirect("https://" + req.headers.host + req.url);
 });
@@ -70,7 +73,7 @@ var cred = {
 };
 var httpServer = http_1.default.createServer(server);
 var httpsServer = https_1.default.createServer(cred, server);
-httpServer.listen(80, function () { return console.log(0); });
-httpsServer.listen(443, function () { return console.log(0); });
+httpServer.listen(PORT, function () { return console.log(PORT); });
+httpsServer.listen(443, function () { return console.log(443); });
 // server.listen(PORT, () => console.log(PORT));
 exports.default = server;

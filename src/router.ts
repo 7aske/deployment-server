@@ -1,5 +1,4 @@
 import express, { Router } from "express";
-import morgan from "morgan";
 import { join } from "path";
 import client from "./client/client";
 import browse from "./server/browse";
@@ -12,12 +11,6 @@ import run from "./server/run";
 import update from "./server/update";
 
 const router = Router();
-
-router.use(
-	morgan(
-		":method :url HTTP/:http-version :status :res[content-length] - :response-time m"
-	)
-);
 
 router.use("/deploy", deploy);
 router.use("/find", find);
