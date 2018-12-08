@@ -57,10 +57,12 @@ var server = express_1.default();
 server.use(morgan_1.default(":method :url HTTP/:http-version :status :res[content-length] - :response-time m"));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
-server.use("/", function (req, res) {
+server.use("/", function (req, res, next) {
     // noinspection TypeScriptValidateJSTypes
     if (req.protocol == "http:")
-        res.redirect("https://" + req.headers.host + req.url);
+        res.status(302).redirect("https://" + req.headers.host + req.url);
+    else
+        next();
 });
 server.use("/", router_1.default);
 var cert = fs_1.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));

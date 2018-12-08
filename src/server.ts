@@ -55,10 +55,11 @@ server.use(
 );
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({extended: true}));
-server.use("/", (req: express.Request, res: express.Response) => {
+server.use("/", (req: express.Request, res: express.Response, next: express.NextFunction) => {
 	// noinspection TypeScriptValidateJSTypes
 	if (req.protocol == "http:")
-		res.redirect("https://" + req.headers.host + req.url);
+		res.status(302).redirect("https://" + req.headers.host + req.url);
+	else next();
 });
 server.use("/", router);
 
