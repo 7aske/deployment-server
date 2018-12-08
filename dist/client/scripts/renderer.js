@@ -39,7 +39,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var serverUrl = getUrl();
 function formatUrl(hostname, port) {
-    return window.location.protocol.match(/(https:)/) ? "https://" + hostname + ":" + port : "http://" + hostname + ":" + port;
+    if (port == 443) {
+        return "https://" + hostname + ":" + port;
+    }
+    else {
+        return "http://" + hostname + ":" + port;
+    }
 }
 var actions = {
     deployBtn: {
@@ -182,8 +187,8 @@ portInp.addEventListener("keyup", function (event) {
     });
 });
 var isFooterUp = false;
-var footer = document.querySelector("footer");
-var footerTrigger = document.querySelector("#footerTrigger");
+// const footer = document.querySelector("footer");
+// const footerTrigger = document.querySelector("#footerTrigger") as HTMLElement;
 var goInp = document.querySelector("#goInp");
 goInp.addEventListener("keyup", function () {
     actions[currentAction.name].placeholder = goInp.value;
@@ -205,10 +210,11 @@ goBtn.addEventListener("click", function () {
     }
 });
 var loaders = document.querySelectorAll(".loader");
-var sidebarButtons = document.querySelectorAll("aside .btn");
+var sidebarButtons = document.querySelectorAll("nav .dropdown .btn");
 sidebarButtons.forEach(function (btn) {
     btn.addEventListener("click", function (event) {
         var target = event.target;
+        console.log(target);
         if (target.id == "refreshBtn")
             return false;
         currentAction = actions[btn.id];
@@ -219,11 +225,11 @@ sidebarButtons.forEach(function (btn) {
         footerUp();
     });
 });
-footerTrigger.addEventListener("mouseenter", footerUp);
+// footerTrigger.addEventListener("mouseenter", footerUp);
 function footerUp() {
     isFooterUp = true;
-    footerTrigger.style.display = "none";
-    footer.style.top = "84vh";
+    // footerTrigger.style.display = "none";
+    // footer.style.transform = "translateY(0)";
     sidebarButtons.forEach(function (btn) {
         if (btn.id == currentAction.name)
             btn.classList.add("active");
@@ -235,11 +241,12 @@ function footerUp() {
 }
 function footerDown() {
     isFooterUp = false;
-    footerTrigger.style.display = "block";
-    footer.style.top = "100vh";
-    sidebarButtons.forEach(function (btn) {
-        btn.classList.remove("active");
-    });
+    // footerTrigger.style.display = "block";
+    // footer.style.transform = "translateY(150px)";
+    // footer.style.top = "100vh";
+    // sidebarButtons.forEach(btn => {
+    // 	btn.classList.remove("active");
+    // });
     goInp.blur();
 }
 // noinspection JSUnusedGlobalSymbols
@@ -267,7 +274,7 @@ function changeTab() {
 }
 function collapseToggle(event) {
     var target = event.target;
-    if (target.nodeName == "BUTTON")
+    if (!target.classList.contains("card-header"))
         return false;
     var bar = target;
     var t = document.querySelector(target.attributes.getNamedItem("data-target").value);
@@ -317,7 +324,8 @@ function execute(payload) {
                     return [4 /*yield*/, fetch(url + "/" + payload.path, {
                             method: "post",
                             headers: {
-                                "Content-Type": "application/json; charset=utf-8",
+                                "Content-Type": "application/json; charset=utf-8"
+                                // "Content-Type": "application/x-www-form-urlencoded",
                             },
                             body: JSON.stringify(payload.data)
                         })];

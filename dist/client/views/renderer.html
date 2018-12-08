@@ -14,31 +14,46 @@
 </head>
 
 <body>
-    <header>
-        <div class="d-flex">
-            <div id="tab0" class="tab active" onclick="handleTabClick(event)">
-                Running
-            </div>
-            <div id="tab1" class="tab" onclick="handleTabClick(event)">
-                Deployed
-            </div>
-        </div>
-        <div class="d-flex justify-content-end">
-            <input id="searchInp" onfocus="this.className='focused'" onblur="this.className=''" placeholder="Search" type="text"><button
-                class="btn btn-secondary" id="searchBtn"><i class="material-icons">search</i></button>
-        </div>
-    </header>
-    <aside>
-        <button class="btn btn-dark" id="deployBtn">Deploy</button>
-        <button class="btn btn-dark" id="updateBtn">Update</button>
-        <button class="btn btn-dark" id="runBtn">Run</button>
-        <button class="btn btn-dark" id="killBtn">Kill</button>
-        <button class="btn btn-dark" id="removeBtn">Remove</button>
-        <button class="btn btn-dark" id="findBtn">Find</button>
-        <button class="btn btn-dark" id="browseBtn">Browse</button>
-        <button class="btn btn-success" id="refreshBtn">Refresh</button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Dev Server</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    </aside>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <div id="tab0" class="nav-link cursor-pointer tab active" onclick="handleTabClick(event)">
+                        Running
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div id="tab1" class="nav-link cursor-pointer tab" onclick="handleTabClick(event)">
+                        Deployed
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Actions
+                    </a>
+                    <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
+                        <button class="dropdown-item text-light btn btn-dark" id="deployBtn">Deploy</button>
+                        <button class="dropdown-item text-light btn btn-dark" id="updateBtn">Update</button>
+                        <button class="dropdown-item text-light btn btn-dark" id="runBtn">Run</button>
+                        <button class="dropdown-item text-light btn btn-dark" id="killBtn">Kill</button>
+                        <button class="dropdown-item text-light btn btn-dark" id="removeBtn">Remove</button>
+                        <button class="dropdown-item text-light btn btn-dark" id="findBtn">Find</button>
+                        <button class="dropdown-item text-light btn btn-dark" id="browseBtn">Browse</button>
+                        <button class="dropdown-item text-light btn btn-success" id="refreshBtn">Refresh</button>
+                    </div>
+                </li>
+            </ul>
+            <div class="form-inline my-2 my-lg-0">
+                <input id="searchInp" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button id="searchBtn" class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </div>
+        </div>
+    </nav>
     <div class="loader hide">
 
     </div>
@@ -51,11 +66,9 @@
 
         </div>
     </main>
-    <div id="footerTrigger">
-        <i class="material-icons">arrow_upward</i>Terminal
-    </div>
+
     <footer>
-        <div class="row w-100 p-3">
+        <div class="row p-2">
             <div class="col-md-6 col-sm-12 d-flex justify-content-around action-input">
                 <input type="text" id="goInp" placeholder="Query">
                 <button class="btn btn-success" id="goBtn"><i class="material-icons">arrow_forward</i></button>

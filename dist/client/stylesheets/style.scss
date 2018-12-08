@@ -15,13 +15,10 @@ html {
 	margin: 0;
 	padding: 0;
 	background-color: #222222;
-	// overflow-y: hidden;
+	overflow-y: hidden;
+	overflow-x: hidden !important;
+
 	height: 100vh;
-}
-body {
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
 }
 ::-webkit-scrollbar {
 	width: 12px;
@@ -37,118 +34,36 @@ body {
 	background-color: #0061a7;
 	-webkit-box-shadow: inset 0 0 6px #406ce4;
 }
-header {
-	height: 35px;
-	position: relative;
-	padding-left: 90px;
-	background-color: #111111;
-	width: 100vw;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	input {
-		background-color: #444444;
-		border: 1px solid black;
-		margin-top: 1px;
-		border-radius: 4px;
-		color: white;
-		height: 29px;
-		padding-left: 5px;
-	}
-	button {
-		margin: 2px 5px;
-		height: 26px;
-		background-color: #444444 !important;
-		border-color: #444444;
-		i {
-			margin-top: -4px;
-		}
-	}
-	.tab {
-		text-align: center;
-		height: 100%;
-		line-height: 30px;
-		width: 200px;
-		color: white;
-		background-color: #444444;
-		transition: all 0ms;
-		&:hover {
-			background-color: #406ce4;
-			cursor: pointer;
-		}
-
-		&:hover:before {
-			background: linear-gradient(125deg, #111111 50%, #406ce4 50%);
-		}
-		&:hover:after {
-			background: linear-gradient(-125deg, #111111 50%, #406ce4 50%);
-		}
-		&::before {
-			content: ' ';
-			//display: inline-block;
-			float: left;
-			width: 20px;
-			height: 20px;
-			background: linear-gradient(125deg, #111111 50%, #444444 50%);
-		}
-		&::after {
-			content: ' ';
-			float: right;
-			width: 20px;
-			height: 20px;
-			background: linear-gradient(-125deg, #111111 50%, #444444 50%);
-		}
-	}
+nav {
 	.active {
 		color: white;
 		background-color: #00406d;
+		border-radius: 10px;
+		padding-left: 10px;
 		&::before {
-			background: linear-gradient(125deg, #111111 50%, #00406d 50%);
-		}
-		&::after {
-			background: linear-gradient(-125deg, #111111 50%, #00406d 50%);
+			content: '-';
 		}
 	}
-}
-aside {
-	box-sizing: border-box;
-	padding: 30px 5px 5px 5px;
-	height: 100vh;
-	width: 90px;
-	position: absolute;
-	z-index: 10;
-	top: 0;
-	left: 0;
-	background-color: #111111;
-	color: white;
-	.btn {
-		margin-bottom: 5px;
-		width: 80px;
+	.dropdown {
+		.active {
+			color: white;
+			background-color: #ffac37;
+			border-radius: 10px;
+			&::before {
+				content: '-';
+			}
+		}
 	}
-	.active {
-		background-color: #f5ac0e !important;
-		color: #111111 !important;
-	}
-}
-#footerTrigger {
-	height: 30px;
-	background-color: #111111;
-	color: #ffffff66;
-	padding-left: 90px;
-	line-height: 30px;
-	font-size: 24px;
 }
 footer {
-	//transform: translateY(300px);
 	position: absolute;
-	top: 100vh;
-	box-sizing: border-box;
+	//top: 100vh;
+	//box-sizing: border-box;
 	z-index: 11;
 	text-align: right;
 	width: 100vw;
 	bottom: 0;
-	height: 16vh;
-	padding: 0 7px 7px 90px;
+	height: 14vh;
 	background-color: #111111;
 	div {
 		.action-input {
@@ -172,16 +87,19 @@ footer {
 			border: 1px solid black;
 			border-radius: 4px;
 			color: white;
-			height: 46px;
+			height: 6vh;
 			padding-left: 5px;
+		}
+		button {
+			height: 6vh;
 		}
 	}
 }
 main {
-	margin-left: 90px;
 	color: white;
-	height: 100vh;
+	height: 86vh;
 	overflow-y: scroll;
+	overflow-x: hidden;
 	.card {
 		.btn {
 			margin-right: 5px;
