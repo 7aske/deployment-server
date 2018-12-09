@@ -8,6 +8,8 @@ import morgan from "morgan";
 import { join } from "path";
 import Deployer from "./deployer";
 import router from "./router";
+import auth from "./middleware/auth";
+import cookieParser from "cookie-parser"
 
 interface PATHS {
 	node: string;
@@ -73,10 +75,9 @@ server.use(
 );
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({extended: true}));
+server.use(cookieParser());
 if (process.argv.indexOf("--ssl") != -1)
-	server.use("/", (req: express.Request, res: express.Response, next: express.NextFunction) => {
-		// noinspection TypeScriptValidateJSTypes
-		console.log(req.protocol);
+	server.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 		if (req.protocol == "http")
 			res.status(302).redirect("https://" + req.headers.host + req.url);
 		else next();
@@ -99,11 +100,11 @@ if (process.argv.indexOf("--ssl") != -1) {
 }
 
 if (process.argv.indexOf("--client") != -1) {
-	const clientFolder = join(process.cwd(), "dist/client");
-	const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
-	rmrf(clientFolder);
-	const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
-	junkFiles.forEach(f => rmrf(join(clientFolder, f)));
+	// const clientFolder = join(process.cwd(), "dist/client");
+	// const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+	// rmrf(clientFolder);
+	// const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
+	// junkFiles.forEach(f => rmrf(join(clientFolder, f)));
 }
 const httpServer = http.createServer(server);
 

@@ -20,6 +20,7 @@ var morgan_1 = __importDefault(require("morgan"));
 var path_1 = require("path");
 var deployer_1 = __importDefault(require("./deployer"));
 var router_1 = __importDefault(require("./router"));
+var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var rmrf = function (path) {
     if (fs_1.default.existsSync(path)) {
         if (fs_1.default.lstatSync(path).isDirectory()) {
@@ -76,10 +77,9 @@ var server = express_1.default();
 server.use(morgan_1.default(":method :url HTTP/:http-version :status :res[content-length] - :response-time m"));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
+server.use(cookie_parser_1.default());
 if (process.argv.indexOf("--ssl") != -1)
-    server.use("/", function (req, res, next) {
-        // noinspection TypeScriptValidateJSTypes
-        console.log(req.protocol);
+    server.use(function (req, res, next) {
         if (req.protocol == "http")
             res.status(302).redirect("https://" + req.headers.host + req.url);
         else
@@ -99,11 +99,11 @@ if (process.argv.indexOf("--ssl") != -1) {
     httpsServer.listen(443, function () { return console.log(443); });
 }
 if (process.argv.indexOf("--client") != -1) {
-    var clientFolder_1 = path_1.join(process.cwd(), "dist/client");
-    var junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
-    rmrf(clientFolder_1);
-    var git = child_process_1.execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", { stdio: "inherit" });
-    junkFiles.forEach(function (f) { return rmrf(path_1.join(clientFolder_1, f)); });
+    // const clientFolder = join(process.cwd(), "dist/client");
+    // const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+    // rmrf(clientFolder);
+    // const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
+    // junkFiles.forEach(f => rmrf(join(clientFolder, f)));
 }
 var httpServer = http_1.default.createServer(server);
 httpServer.listen(PORT, function () { return console.log(PORT); });
