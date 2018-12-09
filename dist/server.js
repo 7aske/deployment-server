@@ -99,11 +99,11 @@ if (process.argv.indexOf("--ssl") != -1) {
     httpsServer.listen(443, function () { return console.log(443); });
 }
 if (process.argv.indexOf("--client") != -1) {
-    // const clientFolder = join(process.cwd(), "dist/client");
-    // const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
-    // rmrf(clientFolder);
-    // const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
-    // junkFiles.forEach(f => rmrf(join(clientFolder, f)));
+    var clientFolder_1 = path_1.join(process.cwd(), "dist/client");
+    var junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+    rmrf(clientFolder_1);
+    var git = child_process_1.execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", { stdio: "inherit" });
+    junkFiles.forEach(function (f) { return rmrf(path_1.join(clientFolder_1, f)); });
 }
 var httpServer = http_1.default.createServer(server);
 httpServer.listen(PORT, function () { return console.log(PORT); });

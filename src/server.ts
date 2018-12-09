@@ -100,11 +100,11 @@ if (process.argv.indexOf("--ssl") != -1) {
 }
 
 if (process.argv.indexOf("--client") != -1) {
-	// const clientFolder = join(process.cwd(), "dist/client");
-	// const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
-	// rmrf(clientFolder);
-	// const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
-	// junkFiles.forEach(f => rmrf(join(clientFolder, f)));
+	const clientFolder = join(process.cwd(), "dist/client");
+	const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+	rmrf(clientFolder);
+	const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
+	junkFiles.forEach(f => rmrf(join(clientFolder, f)));
 }
 const httpServer = http.createServer(server);
 
