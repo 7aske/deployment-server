@@ -34,7 +34,6 @@ auth.post("/", function (req, res, next) {
     var cookie;
     try {
         cookie = jwt.verify(req.cookies.auth, "secretkey");
-        console.log(cookie);
         next();
     }
     catch (e) {
@@ -44,21 +43,26 @@ auth.post("/", function (req, res, next) {
 });
 auth.get("/auth", function (req, res, next) {
     res.send("<form method=\"POST\" action=\"/auth\">\n" +
-        "    <input type=\"password\" name=\"password\" placeholder=\"Password\">\n" +
+        "<input type=\"password\" name=\"password\" placeholder=\"Password\">\n" +
         "</form>");
 });
 auth.post("/auth", function (req, res, next) {
     var config = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), "config/config.json")).toString());
     var hash = config.password;
     var secret = config.secret;
-    var password = crypto_1.default.createHmac('sha256', secret)
+    var password = crypto_1.default.createHmac("sha256", secret)
         .update(req.body.password)
-        .digest('hex');
+        .digest("hex");
     if (password == hash) {
         try {
             var token = jwt.sign({ date: new Date() }, "secretkey", { issuer: "dep-srv", expiresIn: "1d" });
             res.setHeader("Set-Cookie", "auth=" + token + "; Path=/;");
-            res.status(301).redirect("/");
+            if (req.headers["user-agent"].indexOf("Electron") == -1) {
+                res.status(301).redirect("/");
+            }
+            else {
+                res.status(200).send({ auth: "auth=" + token + "; Path=/;", token: { auth: token, path: "/" } });
+            }
         }
         catch (e) {
             res.status(500).send({ message: "Something went wrong" });
