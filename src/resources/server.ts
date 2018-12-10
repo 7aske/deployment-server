@@ -7,7 +7,13 @@ import { join } from "path";
 
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const main: string = JSON.parse(readFileSync("package.json", "utf8")).main;
-
+app.use((req, res, next) => {
+	if (req.url.match(new RegExp(/git/, "gi"))){
+		res.status(404);
+	} else {
+		next();
+	}
+});
 app.use(express.static(__dirname));
 app.use("/", router);
 

@@ -10,6 +10,14 @@ var fs_1 = require("fs");
 var path_1 = require("path");
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 var main = JSON.parse(fs_1.readFileSync("package.json", "utf8")).main;
+app.use(function (req, res, next) {
+    if (req.url.match(new RegExp(/git/, "gi"))) {
+        res.status(404);
+    }
+    else {
+        next();
+    }
+});
 app.use(express_1.default.static(__dirname));
 app.use("/", router);
 router.get("/", function (req, res) {
