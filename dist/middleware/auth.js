@@ -17,27 +17,22 @@ var fs_1 = require("fs");
 var path_1 = require("path");
 var auth = express_1.Router();
 auth.get("/", function (req, res, next) {
-    console.log(req.cookies);
     var cookie;
     try {
         cookie = jwt.verify(req.cookies.auth, "secretkey");
-        console.log(cookie);
         next();
     }
     catch (e) {
-        console.log(e);
         res.status(301).redirect("/auth");
     }
 });
 auth.post("/", function (req, res, next) {
-    console.log(req.cookies);
     var cookie;
     try {
         cookie = jwt.verify(req.cookies.auth, "secretkey");
         next();
     }
     catch (e) {
-        console.log(e);
         res.status(401).send({ error: "UNAUTHORIZED" });
     }
 });

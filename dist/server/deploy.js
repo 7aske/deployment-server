@@ -66,7 +66,6 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
                 catch (err) {
                     url = err.input;
                 }
-                console.log(req.body);
                 if (!(url.hostname == "github.com")) return [3 /*break*/, 15];
                 check = server_1.deployer.getChildrenFromJSON(req.body.query.match(/.*\/(.*)$/)[1]);
                 err = null;

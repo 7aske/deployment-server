@@ -1,3 +1,4 @@
+/* tslint:disable:ordered-imports */
 import * as bodyParser from "body-parser";
 import { execSync } from "child_process";
 import express from "express";
@@ -8,8 +9,7 @@ import morgan from "morgan";
 import { join } from "path";
 import Deployer from "./deployer";
 import router from "./router";
-import auth from "./middleware/auth";
-import cookieParser from "cookie-parser"
+import cookieParser from "cookie-parser";
 
 interface PATHS {
 	node: string;
@@ -61,8 +61,8 @@ if (!fs.existsSync(PATHSConfigFolder)) {
 } else {
 	PATHS = JSON.parse(fs.readFileSync(PATHSConfigFile, "utf8"));
 }
-if (process.platform == "linux" && !fs.existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
-fs.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
+// if (process.platform == "linux" && !fs.existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
+// fs.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 export const deployer = new Deployer(PORT, PATHS);
@@ -70,7 +70,7 @@ const server = express();
 
 server.use(
 	morgan(
-		":method :url HTTP/:http-version :status :res[content-length] - :response-time m"
+		":method :url (:remote-addr)\n:date[clf] - [:status] - :response-time ms"
 	)
 );
 server.use(bodyParser.json());

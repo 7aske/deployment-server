@@ -7,26 +7,21 @@ import { join } from "path";
 const auth = Router();
 
 auth.get("/", (req, res, next) => {
-	console.log(req.cookies);
 	let cookie;
 	try {
 		cookie = jwt.verify(req.cookies.auth, "secretkey");
-		console.log(cookie);
 		next();
 	} catch (e) {
-		console.log(e);
 		res.status(301).redirect("/auth");
 	}
 });
 
 auth.post("/", (req, res, next) => {
-	console.log(req.cookies);
 	let cookie;
 	try {
 		cookie = jwt.verify(req.cookies.auth, "secretkey");
 		next();
 	} catch (e) {
-		console.log(e);
 		res.status(401).send({error: "UNAUTHORIZED"});
 	}
 });

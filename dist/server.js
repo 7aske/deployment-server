@@ -10,6 +10,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/* tslint:disable:ordered-imports */
 var bodyParser = __importStar(require("body-parser"));
 var child_process_1 = require("child_process");
 var express_1 = __importDefault(require("express"));
@@ -68,13 +69,12 @@ if (!fs_1.default.existsSync(PATHSConfigFolder)) {
 else {
     PATHS = JSON.parse(fs_1.default.readFileSync(PATHSConfigFile, "utf8"));
 }
-if (process.platform == "linux" && !fs_1.default.existsSync("/usr/bin/node"))
-    child_process_1.execSync("sudo ln -s " + PATHS.node + " /usr/bin/node");
-fs_1.default.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
+// if (process.platform == "linux" && !fs.existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
+// fs.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 exports.deployer = new deployer_1.default(PORT, PATHS);
 var server = express_1.default();
-server.use(morgan_1.default(":method :url HTTP/:http-version :status :res[content-length] - :response-time m"));
+server.use(morgan_1.default(":method :url (:remote-addr)\n:date[clf] - [:status] - :response-time ms"));
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookie_parser_1.default());
