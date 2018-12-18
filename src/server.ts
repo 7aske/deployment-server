@@ -21,9 +21,11 @@ const rmrf = (path: string) => {
 		if (fs.lstatSync(path).isDirectory()) {
 			fs.readdirSync(path).forEach((file: string, index: number) => {
 				const curPath = path + "/" + file;
-				if (fs.lstatSync(curPath).isDirectory()) { // recurse
+				if (fs.lstatSync(curPath).isDirectory()) {
+					// recurse
 					rmrf(curPath);
-				} else { // delete file
+				} else {
+					// delete file
 					fs.unlinkSync(curPath);
 				}
 			});
@@ -61,29 +63,27 @@ if (!fs.existsSync(PATHSConfigFolder)) {
 } else {
 	PATHS = JSON.parse(fs.readFileSync(PATHSConfigFile, "utf8"));
 }
-// if (process.platform == "linux" && !fs.existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
-// fs.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 export const deployer = new Deployer(PORT, PATHS);
 const server = express();
 
-server.use(
-	morgan(
-		":method :url (:remote-addr)\n:date[clf] - [:status] - :response-time ms"
-	)
-);
+server.use(morgan(":method :url (:remote-addr)\n:date[clf] - [:status] - :response-time ms"));
+// CORS
+server.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
 server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({extended: true}));
+server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookieParser());
 if (process.argv.indexOf("--ssl") != -1)
 	server.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-		if (req.protocol == "http")
-			res.status(302).redirect("https://" + req.headers.host + req.url);
+		if (req.protocol == "http") res.status(302).redirect("https://" + req.headers.host + req.url);
 		else next();
 	});
 server.use("/", router);
-
 
 if (process.argv.indexOf("--ssl") != -1) {
 	const cert = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
@@ -101,9 +101,21 @@ if (process.argv.indexOf("--ssl") != -1) {
 
 if (process.argv.indexOf("--client") != -1) {
 	const clientFolder = join(process.cwd(), "dist/client");
-	const junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+	const junkFiles = [
+		"config",
+		"dist/main",
+		"src",
+		".git",
+		".gitignore",
+		"package.json",
+		"package-lock.json",
+		"tsconfig.json",
+		"tslint.json"
+	];
 	rmrf(clientFolder);
-	const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {stdio: "inherit"});
+	const git = execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {
+		stdio: "inherit"
+	});
 	junkFiles.forEach(f => rmrf(join(clientFolder, f)));
 }
 const httpServer = http.createServer(server);

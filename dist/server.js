@@ -27,10 +27,12 @@ var rmrf = function (path) {
         if (fs_1.default.lstatSync(path).isDirectory()) {
             fs_1.default.readdirSync(path).forEach(function (file, index) {
                 var curPath = path + "/" + file;
-                if (fs_1.default.lstatSync(curPath).isDirectory()) { // recurse
+                if (fs_1.default.lstatSync(curPath).isDirectory()) {
+                    // recurse
                     rmrf(curPath);
                 }
-                else { // delete file
+                else {
+                    // delete file
                     fs_1.default.unlinkSync(curPath);
                 }
             });
@@ -69,12 +71,16 @@ if (!fs_1.default.existsSync(PATHSConfigFolder)) {
 else {
     PATHS = JSON.parse(fs_1.default.readFileSync(PATHSConfigFile, "utf8"));
 }
-// if (process.platform == "linux" && !fs.existsSync("/usr/bin/node")) execSync(`sudo ln -s ${PATHS.node} /usr/bin/node`);
-// fs.writeFileSync(PATHSConfigFile, JSON.stringify(PATHS));
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 exports.deployer = new deployer_1.default(PORT, PATHS);
 var server = express_1.default();
 server.use(morgan_1.default(":method :url (:remote-addr)\n:date[clf] - [:status] - :response-time ms"));
+// CORS
+server.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookie_parser_1.default());
@@ -100,9 +106,21 @@ if (process.argv.indexOf("--ssl") != -1) {
 }
 if (process.argv.indexOf("--client") != -1) {
     var clientFolder_1 = path_1.join(process.cwd(), "dist/client");
-    var junkFiles = ["config", "dist/main", "src", ".git", ".gitignore", "package.json", "package-lock.json", "tsconfig.json", "tslint.json"];
+    var junkFiles = [
+        "config",
+        "dist/main",
+        "src",
+        ".git",
+        ".gitignore",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "tslint.json"
+    ];
     rmrf(clientFolder_1);
-    var git = child_process_1.execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", { stdio: "inherit" });
+    var git = child_process_1.execSync("git clone https://github.com/7aske/deployment-client-electron ./dist/client", {
+        stdio: "inherit"
+    });
     junkFiles.forEach(function (f) { return rmrf(path_1.join(clientFolder_1, f)); });
 }
 var httpServer = http_1.default.createServer(server);
