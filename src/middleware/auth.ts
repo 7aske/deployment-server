@@ -1,15 +1,16 @@
-import * as jwt from "jsonwebtoken";
-import { Router } from "express";
 import crypto from "crypto";
+import { Router } from "express";
 import { readFileSync } from "fs";
+import * as jwt from "jsonwebtoken";
 import { join } from "path";
 
 const auth = Router();
-
+const config: any = JSON.parse(readFileSync(join(process.cwd(), "config/config.json")).toString());
 auth.get("/", (req, res, next) => {
+	const reqCookie = req.cookies.auth || req.body.auth;
 	let cookie;
 	try {
-		cookie = jwt.verify(req.cookies.auth, "secretkey");
+		cookie = jwt.verify(reqCookie, "secretkey");
 		next();
 	} catch (e) {
 		res.status(301).redirect("/auth");
@@ -17,9 +18,11 @@ auth.get("/", (req, res, next) => {
 });
 
 auth.post("/", (req, res, next) => {
+	const reqCookie = req.cookies.auth || req.body.auth;
+	console.log(req.cookies);
 	let cookie;
 	try {
-		cookie = jwt.verify(req.cookies.auth, "secretkey");
+		cookie = jwt.verify(reqCookie, "secretkey");
 		next();
 	} catch (e) {
 		res.status(401).send({error: "UNAUTHORIZED"});
@@ -27,19 +30,15 @@ auth.post("/", (req, res, next) => {
 });
 
 auth.get("/auth", (req, res, next) => {
-	res.send("<form method=\"POST\" action=\"/auth\">\n" +
-		"<input type=\"password\" name=\"password\" placeholder=\"Password\">\n" +
-		"</form>");
+	res.sendFile(join(process.cwd(), "dist/resources/login.html"));
 });
 
 auth.post("/auth", (req, res, next) => {
-	const config: any = JSON.parse(readFileSync(join(process.cwd(), "config/config.json")).toString());
-	const hash: string = config.password;
-	const secret: string = config.secret;
-	const password = crypto.createHmac("sha256", secret)
+	// const config: any = JSON.parse(readFileSync(join(process.cwd(), "config/config.json")).toString());
+	const password = crypto.createHmac("sha256", config.secret)
 		.update(req.body.password)
 		.digest("hex");
-	if (password == hash) {
+	if (password == config.password) {
 		try {
 			const token = jwt.sign({date: new Date()}, "secretkey", {issuer: "dep-srv", expiresIn: "1d"});
 			res.setHeader("Set-Cookie", `auth=${token}; Path=/;`);
@@ -55,6 +54,5 @@ auth.post("/auth", (req, res, next) => {
 		res.status(401).send({error: "UNAUTHORIZED"});
 	}
 });
-
 
 export default auth;

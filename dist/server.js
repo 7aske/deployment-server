@@ -125,5 +125,9 @@ if (process.argv.indexOf("--client") != -1) {
 }
 var httpServer = http_1.default.createServer(server);
 httpServer.listen(PORT, function () { return console.log(PORT); });
-// server.listen(PORT, () => console.log(PORT));
+httpServer.on("error", function (error) {
+    if (error.code == "EACCES") {
+        httpServer.listen(8080, function () { return console.log("Cannot access " + PORT + ". Defaulting to port 8080"); });
+    }
+});
 exports.default = server;

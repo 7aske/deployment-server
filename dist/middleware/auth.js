@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -6,20 +9,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var jwt = __importStar(require("jsonwebtoken"));
-var express_1 = require("express");
 var crypto_1 = __importDefault(require("crypto"));
+var express_1 = require("express");
 var fs_1 = require("fs");
+var jwt = __importStar(require("jsonwebtoken"));
 var path_1 = require("path");
 var auth = express_1.Router();
+var config = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), "config/config.json")).toString());
 auth.get("/", function (req, res, next) {
+    var reqCookie = req.cookies.auth || req.body.auth;
     var cookie;
     try {
-        cookie = jwt.verify(req.cookies.auth, "secretkey");
+        cookie = jwt.verify(reqCookie, "secretkey");
         next();
     }
     catch (e) {
@@ -27,9 +29,11 @@ auth.get("/", function (req, res, next) {
     }
 });
 auth.post("/", function (req, res, next) {
+    var reqCookie = req.cookies.auth || req.body.auth;
+    console.log(req.cookies);
     var cookie;
     try {
-        cookie = jwt.verify(req.cookies.auth, "secretkey");
+        cookie = jwt.verify(reqCookie, "secretkey");
         next();
     }
     catch (e) {
@@ -37,18 +41,14 @@ auth.post("/", function (req, res, next) {
     }
 });
 auth.get("/auth", function (req, res, next) {
-    res.send("<form method=\"POST\" action=\"/auth\">\n" +
-        "<input type=\"password\" name=\"password\" placeholder=\"Password\">\n" +
-        "</form>");
+    res.sendFile(path_1.join(process.cwd(), "dist/resources/login.html"));
 });
 auth.post("/auth", function (req, res, next) {
-    var config = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), "config/config.json")).toString());
-    var hash = config.password;
-    var secret = config.secret;
-    var password = crypto_1.default.createHmac("sha256", secret)
+    // const config: any = JSON.parse(readFileSync(join(process.cwd(), "config/config.json")).toString());
+    var password = crypto_1.default.createHmac("sha256", config.secret)
         .update(req.body.password)
         .digest("hex");
-    if (password == hash) {
+    if (password == config.password) {
         try {
             var token = jwt.sign({ date: new Date() }, "secretkey", { issuer: "dep-srv", expiresIn: "1d" });
             res.setHeader("Set-Cookie", "auth=" + token + "; Path=/;");
