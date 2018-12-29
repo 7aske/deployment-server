@@ -22,6 +22,7 @@ var path_1 = require("path");
 var deployer_1 = __importDefault(require("./deployer"));
 var router_1 = __importDefault(require("./router"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
+var auth_1 = __importDefault(require("./middleware/auth"));
 var rmrf = function (path) {
     if (fs_1.default.existsSync(path)) {
         if (fs_1.default.lstatSync(path).isDirectory()) {
@@ -91,6 +92,8 @@ if (process.argv.indexOf("--ssl") != -1)
         else
             next();
     });
+if (process.argv.indexOf("--no-auth") == -1)
+    server.use("/", auth_1.default);
 server.use("/", router_1.default);
 if (process.argv.indexOf("--ssl") != -1) {
     var cert = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
