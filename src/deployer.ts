@@ -344,7 +344,7 @@ export default class Deployer {
 	public browse(query: string | null): ChildServer[] {
 		const childrenJSON: ChildrenJSON = JSON.parse(readFileSync(join(process.cwd(), this.childrenJSON), "utf8"));
 		const result: ChildServer[] = [];
-		if (typeof query == "string") {
+		if (typeof query == "string" && query != "") {
 			const child = childrenJSON.children.find(c => {
 				return c.id == query || c.name == query;
 			});
@@ -441,7 +441,7 @@ export default class Deployer {
 	}
 
 	public getRunningChildren(query: string | number | null): ChildServer[] | ChildServer | null {
-		if (typeof query == "string") {
+		if (typeof query == "string" && query != "") {
 			const child = this.children.find(c => c.id == query || c.name == query);
 			return child ? child : null;
 		}

@@ -333,7 +333,7 @@ var Deployer = /** @class */ (function () {
     Deployer.prototype.browse = function (query) {
         var childrenJSON = JSON.parse(fs_1.readFileSync(path_1.join(process.cwd(), this.childrenJSON), "utf8"));
         var result = [];
-        if (typeof query == "string") {
+        if (typeof query == "string" && query != "") {
             var child = childrenJSON.children.find(function (c) {
                 return c.id == query || c.name == query;
             });
@@ -444,7 +444,7 @@ var Deployer = /** @class */ (function () {
         }
     };
     Deployer.prototype.getRunningChildren = function (query) {
-        if (typeof query == "string") {
+        if (typeof query == "string" && query != "") {
             var child = this.children.find(function (c) { return c.id == query || c.name == query; });
             return child ? child : null;
         }

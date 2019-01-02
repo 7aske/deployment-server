@@ -29,11 +29,9 @@ var rmrf = function (path) {
             fs_1.default.readdirSync(path).forEach(function (file, index) {
                 var curPath = path + "/" + file;
                 if (fs_1.default.lstatSync(curPath).isDirectory()) {
-                    // recurse
                     rmrf(curPath);
                 }
                 else {
-                    // delete file
                     fs_1.default.unlinkSync(curPath);
                 }
             });
@@ -52,25 +50,25 @@ var PATHS = {
 };
 if (!fs_1.default.existsSync(PATHSConfigFolder)) {
     fs_1.default.mkdirSync(PATHSConfigFolder);
-    if (process.platform == "linux") {
-        PATHS.node = child_process_1.execSync("which node")
-            .toString()
-            .split("\n")[0];
-        PATHS.npm = child_process_1.execSync("which npm")
-            .toString()
-            .split("\n")[0];
-    }
-    else if (process.platform == "win32") {
-        PATHS.node = child_process_1.execSync("where node")
-            .toString()
-            .split("\r\n")[0];
-        PATHS.npm = child_process_1.execSync("where npm")
-            .toString()
-            .split("\r\n")[1];
-    }
 }
 else {
     PATHS = JSON.parse(fs_1.default.readFileSync(PATHSConfigFile, "utf8"));
+}
+if (process.platform == "linux") {
+    PATHS.node = child_process_1.execSync("which node")
+        .toString()
+        .split("\n")[0];
+    PATHS.npm = child_process_1.execSync("which npm")
+        .toString()
+        .split("\n")[0];
+}
+else if (process.platform == "win32") {
+    PATHS.node = child_process_1.execSync("where node")
+        .toString()
+        .split("\r\n")[0];
+    PATHS.npm = child_process_1.execSync("where npm")
+        .toString()
+        .split("\r\n")[1];
 }
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 exports.deployer = new deployer_1.default(PORT, PATHS);
