@@ -3,3 +3,4 @@ deployment
 config
 .idea
 dist/client
+package-lock.json

@@ -10,9 +10,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/* tslint:disable:ordered-imports */
 var bodyParser = __importStar(require("body-parser"));
 var child_process_1 = require("child_process");
+var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var express_1 = __importDefault(require("express"));
 var fs_1 = __importDefault(require("fs"));
 var http_1 = __importDefault(require("http"));
@@ -20,9 +20,9 @@ var https_1 = __importDefault(require("https"));
 var morgan_1 = __importDefault(require("morgan"));
 var path_1 = require("path");
 var deployer_1 = __importDefault(require("./deployer"));
-var router_1 = __importDefault(require("./router"));
-var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var auth_1 = __importDefault(require("./middleware/auth"));
+var https_redirect_1 = require("./middleware/https-redirect");
+var router_1 = __importDefault(require("./router"));
 var rmrf = function (path) {
     if (fs_1.default.existsSync(path)) {
         if (fs_1.default.lstatSync(path).isDirectory()) {
@@ -84,12 +84,7 @@ server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookie_parser_1.default());
 if (process.argv.indexOf("--ssl") != -1)
-    server.use(function (req, res, next) {
-        if (req.protocol == "http")
-            res.status(302).redirect("https://" + req.headers.host + req.url);
-        else
-            next();
-    });
+    server.use(https_redirect_1.httpsRedirect);
 if (process.argv.indexOf("--no-auth") == -1)
     server.use("/", auth_1.default);
 server.use("/", router_1.default);
@@ -123,6 +118,9 @@ if (process.argv.indexOf("--client") != -1) {
         stdio: "inherit"
     });
     junkFiles.forEach(function (f) { return rmrf(path_1.join(clientFolder_1, f)); });
+}
+else {
+    console.log("You are running the server without client. (no --client option)");
 }
 var httpServer = http_1.default.createServer(server);
 httpServer.listen(PORT, function () { return console.log(PORT); });

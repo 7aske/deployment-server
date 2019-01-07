@@ -1,7 +1,6 @@
 import express, { Router } from "express";
 import { join } from "path";
 import client from "./client";
-import auth from "./middleware/auth";
 import browse from "./server/browse";
 import clear from "./server/clear";
 import deploy from "./server/deploy";

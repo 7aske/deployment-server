@@ -5,6 +5,7 @@
     ],
     "jsRules": {},
     "rules": {
+        "no-empty": false,
         "interface-name": false,
         "indent": false,
         "trailing-comma": false,
