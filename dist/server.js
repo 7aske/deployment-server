@@ -54,21 +54,27 @@ if (!fs_1.default.existsSync(PATHSConfigFolder)) {
 else {
     PATHS = JSON.parse(fs_1.default.readFileSync(PATHSConfigFile, "utf8"));
 }
-// if (process.platform == "linux") {
-//     PATHS.node = execSync("which node")
-//         .toString()
-//         .split("\n")[0];
-//     PATHS.npm = execSync("which npm")
-//         .toString()
-//         .split("\n")[0];
-// } else if (process.platform == "win32") {
-//     PATHS.node = execSync("where node")
-//         .toString()
-//         .split("\r\n")[0];
-//     PATHS.npm = execSync("where npm")
-//         .toString()
-//         .split("\r\n")[1];
-// }
+try {
+    if (process.platform == "linux") {
+        PATHS.node = child_process_1.execSync("which node")
+            .toString()
+            .split("\n")[0];
+        PATHS.npm = child_process_1.execSync("which npm")
+            .toString()
+            .split("\n")[0];
+    }
+    else if (process.platform == "win32") {
+        PATHS.node = child_process_1.execSync("where node")
+            .toString()
+            .split("\r\n")[0];
+        PATHS.npm = child_process_1.execSync("where npm")
+            .toString()
+            .split("\r\n")[1];
+    }
+}
+catch (e) {
+    console.log("Server couldn't find 'node' and 'npm' executables.\nMake sure you specify them in PATHS.json");
+}
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
 exports.deployer = new deployer_1.default(PORT, PATHS);
 var server = express_1.default();

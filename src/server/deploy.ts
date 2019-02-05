@@ -47,21 +47,21 @@ deploy.post("/", async (req: Request, res: Response) => {
 				// if (process.env.NODE_ENV == 'dev') console.info(child);
 			} catch (error) {
 				err = error;
-				// if (process.env.NODE_ENV == 'dev') console.error(child);
+				if (process.env.NODE_ENV == "dev") console.error(child);
 			}
 			try {
 				if (!err) child = await deployer.install(child);
 				// if (process.env.NODE_ENV == 'dev')console.info(child);
 			} catch (error) {
 				err = error;
-				// if (process.env.NODE_ENV == 'dev') console.error(child);
+				if (process.env.NODE_ENV == "dev") console.error(child);
 			}
 			try {
 				if (!err) child = await deployer.run(child);
 				// if (process.env.NODE_ENV == 'dev')console.info(child);
 			} catch (error) {
 				err = error;
-				// if (process.env.NODE_ENV == 'dev') console.error(child);
+				if (process.env.NODE_ENV == "dev") console.error(child);
 			}
 			if (!err) {
 				res.send(Deployer.formatChild(child));

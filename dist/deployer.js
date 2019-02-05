@@ -79,10 +79,10 @@ var Deployer = /** @class */ (function () {
             // check if the folder already exists to decide whether pull or clone
             var pull = fs_1.existsSync(path_1.join(process.cwd(), child.dir));
             var git = pull
-                ? child_process_1.execFile("git", ["pull"], {
+                ? child_process_1.spawn("git", ["pull"], {
                     cwd: path_1.join(process.cwd(), child.dir)
                 })
-                : child_process_1.execFile("git", ["clone", child.repo], {
+                : child_process_1.spawn("git", ["clone", child.repo], {
                     cwd: path_1.join(process.cwd(), _this.repoDir)
                 });
             child.action = pull ? "pull" : "clone";
@@ -182,9 +182,9 @@ var Deployer = /** @class */ (function () {
                         if (_a.sent()) {
                             node = void 0;
                             // TODO: c9 integration
-                            node = child_process_1.execFile(this.PATHS.node, [main], {
+                            node = child_process_1.spawn(this.PATHS.node, [main], {
                                 cwd: path_1.join(process.cwd(), child.dir),
-                                env: { PORT: port }
+                                env: { PORT: port.toString() }
                             });
                             if (process.env.NODE_ENV == "dev") {
                                 // pipe output to main process for debugging
@@ -223,9 +223,10 @@ var Deployer = /** @class */ (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             // preform a test
-            var node = child_process_1.execFile(_this.PATHS.node, [main], {
+            console.log(_this.PATHS.node);
+            var node = child_process_1.spawn(_this.PATHS.node, [main], {
                 cwd: path_1.join(process.cwd(), child.dir),
-                env: { PORT: port }
+                env: { PORT: port.toString() }
             });
             if (process.env.NODE_ENV == "dev") {
                 // pipe output to main process for debugging

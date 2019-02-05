@@ -101,10 +101,10 @@ export default class Deployer {
 			// check if the folder already exists to decide whether pull or clone
 			const pull: boolean = existsSync(join(process.cwd(), child.dir));
 			const git: ChildProcess = pull
-				? execFile("git", [`pull`], {
+				? spawn("git", [`pull`], {
 						cwd: join(process.cwd(), child.dir)
 				  })
-				: execFile("git", ["clone", child.repo], {
+				: spawn("git", ["clone", child.repo], {
 						cwd: join(process.cwd(), this.repoDir)
 				  });
 			child.action = pull ? "pull" : "clone";
@@ -204,9 +204,9 @@ export default class Deployer {
 						if (await this.runTest(child, port, main)) {
 							let node: ChildProcess;
 							// TODO: c9 integration
-							node = execFile(this.PATHS.node, [main], {
+							node = spawn(this.PATHS.node, [main], {
 								cwd: join(process.cwd(), child.dir),
-								env: { PORT: port }
+								env: { PORT: port.toString() }
 							});
 							if (process.env.NODE_ENV == "dev") {
 								// pipe output to main process for debugging
@@ -239,9 +239,10 @@ export default class Deployer {
 	protected runTest(child: ChildServer, port: number, main: string): Promise<boolean> {
 		return new Promise((resolve, reject) => {
 			// preform a test
-			const node: ChildProcess = execFile(this.PATHS.node, [main], {
+			console.log(this.PATHS.node);
+			const node: ChildProcess = spawn(this.PATHS.node, [main], {
 				cwd: join(process.cwd(), child.dir),
-				env: { PORT: port }
+				env: { PORT: port.toString() }
 			});
 			if (process.env.NODE_ENV == "dev") {
 				// pipe output to main process for debugging

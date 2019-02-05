@@ -104,6 +104,8 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
             case 4:
                 error_1 = _a.sent();
                 err = error_1;
+                if (process.env.NODE_ENV == "dev")
+                    console.error(child);
                 return [3 /*break*/, 5];
             case 5:
                 _a.trys.push([5, 8, , 9]);
@@ -116,6 +118,8 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
             case 8:
                 error_2 = _a.sent();
                 err = error_2;
+                if (process.env.NODE_ENV == "dev")
+                    console.error(child);
                 return [3 /*break*/, 9];
             case 9:
                 _a.trys.push([9, 12, , 13]);
@@ -128,6 +132,8 @@ deploy.post("/", function (req, res) { return __awaiter(_this, void 0, void 0, f
             case 12:
                 error_3 = _a.sent();
                 err = error_3;
+                if (process.env.NODE_ENV == "dev")
+                    console.error(child);
                 return [3 /*break*/, 13];
             case 13:
                 if (!err) {
