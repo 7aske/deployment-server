@@ -81,7 +81,7 @@ server.use(bodyParser.urlencoded({extended: true}));
 server.use(cookieParser());
 if (process.argv.indexOf("--ssl") != -1)
     server.use(httpsRedirect);
-if (process.argv.indexOf("--no-auth") == -1) server.use("/", auth);
+if (process.argv.indexOf("--auth") != -1) server.use("/", auth);
 server.use("/", router);
 
 if (process.argv.indexOf("--ssl") != -1) {

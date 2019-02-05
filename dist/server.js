@@ -90,7 +90,7 @@ server.use(bodyParser.urlencoded({ extended: true }));
 server.use(cookie_parser_1.default());
 if (process.argv.indexOf("--ssl") != -1)
     server.use(https_redirect_1.httpsRedirect);
-if (process.argv.indexOf("--no-auth") == -1)
+if (process.argv.indexOf("--auth") != -1)
     server.use("/", auth_1.default);
 server.use("/", router_1.default);
 if (process.argv.indexOf("--ssl") != -1) {
