@@ -67,7 +67,8 @@ try {
     console.log("Server couldn't find 'node' and 'npm' executables.\nMake sure you specify them in PATHS.json");
 }
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 80;
-export const deployer = new Deployer(PORT, PATHS);
+const CHILD_PORT = process.env.CHILD_PORT ? parseInt(process.env.CHILD_PORT, 10) : 3000;
+export const deployer = new Deployer(CHILD_PORT, PATHS);
 const server = express();
 server.use(morgan(":method :url (:remote-addr)\n:date[clf] - [:status] - :response-time ms"));
 // CORS
