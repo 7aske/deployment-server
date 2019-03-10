@@ -86,9 +86,9 @@ if (process.argv.indexOf("--auth") != -1) server.use("/", auth);
 server.use("/", router);
 
 if (process.argv.indexOf("--ssl") != -1) {
-    const cert = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
-    const key = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/privkey1.pem"));
-    const ca = fs.readFileSync(join(process.cwd(), "config/ssl/7aske.servebeer.com/chain1.pem"));
+    const cert = fs.readFileSync(join(process.cwd(), "config/ssl/cert.pem"));
+    const key = fs.readFileSync(join(process.cwd(), "config/ssl/privkey.pem"));
+    const ca = fs.readFileSync(join(process.cwd(), "config/ssl/chain.pem"));
 
     const cred = {
         ca,

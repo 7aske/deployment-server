@@ -95,9 +95,9 @@ if (process.argv.indexOf("--auth") != -1)
     server.use("/", auth_1.default);
 server.use("/", router_1.default);
 if (process.argv.indexOf("--ssl") != -1) {
-    var cert = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/cert1.pem"));
-    var key = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/privkey1.pem"));
-    var ca = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/7aske.servebeer.com/chain1.pem"));
+    var cert = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/cert.pem"));
+    var key = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/privkey.pem"));
+    var ca = fs_1.default.readFileSync(path_1.join(process.cwd(), "config/ssl/chain.pem"));
     var cred = {
         ca: ca,
         cert: cert,
